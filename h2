@@ -1,0 +1,500 @@
+  526  find ./ -name db*
+  527  cd /bases
+  528  ll
+  529  mkdir dbprocessing
+  530  cd dbprocessing
+  531  ll
+  532  mkdir medline
+  533  cd medline
+  534  ll
+  535  cd /bases/mdlG4
+  536  cd tpl.mdl
+  537  ls
+  538  cd /bases/lilG4
+  539  cd tpl.lil
+  540  cd /bases
+  541  ll
+  542  ll /usr/local
+  543  ll /usr/local/proc
+  544  ll /usr/local/procs
+  545  ll /usr/local/bireme/procs
+  546  cd /bases
+  547  ll
+  548  MDL
+  549  cd /bases
+  550  cd github/
+  551  ll
+  552  cd db-processing/
+  553  ll
+  554  cd MEDLINE
+  555  ll
+  556  ll tpl.mdl
+  557  ll
+  558  ll tpl.mdl/
+  559  cd tpl.mdl/
+  560  ll
+  561  ls
+  562  cd ..
+  563  diff tpl.mdl /bases/mdlG4/tpl.mdl
+  564  ll
+  565  ll
+  566  cd ..
+  567  ll
+  568  cd MEDLINE
+  569  ll
+  570  ll tpl.mdl
+  571  cd ..
+  572  ll
+  573  more h1.github.vinicius
+  574  more h1.github.vinicius
+  575  ll
+  576  git add MEDLINE
+  577  git status
+  578  MDL
+  579  ll -d tpl*
+  580  rm -r tpl.mdl.oficial/
+  581  cp -r tpl.mdl/ tpl.mdl.oficial
+  582  cd -
+  583  ll
+  584  ll TESTE
+  585  ll
+  586  cd MEDLINE
+  587  ll
+  588  cd ..
+  589  rm -r MEDLINE/tpl.mdl
+  590  MDL
+  591  scp -r tpl.mdl serverofi4:/bases/mdlG4
+  592  cd -
+  593  ll
+  594  cd MEDLINE
+  595  ll
+  596  cd ..
+  597  git reset HEAD MEDLINE
+  598  git status
+  599  cd MEDLINE
+  600  ll
+  601  ll
+  602  cd ..
+  603  ll
+  604  ll .git
+  605  ls -Ri */.git/objects
+  606  ls -Ri .git/objects
+  607  ls .git/objects
+  608  ll .git/objects
+  609* 
+  610  ls -R .git/objects
+  611  ls -Ri .git/objects
+  612  ll
+  613  cd MEDLINE
+  614  ln /bases/mdlG4/tpl.mdl.oficial tpl.mdl
+  615  ll
+  616  ll
+  617  cd ..
+  618  ll MEDLINE
+  619  cd MEDLINE
+  620  ll
+  621  cd ..
+  622  ll
+  623  mkdir MEDLINE
+  624  ll
+  625  cd MEDLINE
+  626  ll
+  627  cp -r /bases/mdlG4/tpl.mdl .
+  628  cp -r /bases/mdlG4/tabs .
+  629  cd tabs
+  630  ll -Sr
+  631  rm decs.*
+  632  du -h
+  633  rm -r pmid
+  634  du -h
+  635  cd ..
+  636  cd ..
+  637  git status
+  638  git add MEDLINE
+  639  git status
+  640  git commit -m "tpl.mdl e tabs"
+  641  git status
+  642  git remote add MEDLINE git@github.com:bireme/db-processing.git
+  643  git status
+  644  git status
+  645  git remote add origin git@github.com:bireme/db-processing.git
+  646  git status
+  647  git add MEDLINE
+  648  git status
+  649  git status
+  650  git status
+  651  git add MEDLINE
+  652  git status
+  653  clear
+  654  git status
+  655  ll
+  656  git add MEDLINE/tpl.mdl
+  657  git status
+  658  git status
+  659  git status
+  660  git reset HEAD MEDLINE
+  661  git status
+  662  git reset HEAD MEDLINE
+  663  git add MEDLINE
+  664  git status
+  665  git add MEDLINE/tabs
+  666  git status
+  667  git add MEDLINE/tpl.mdl
+  668  git status
+  669  git reset
+  670  git status
+  671  git status
+  672  cd MEDLINE
+  673  ll
+  674  rm -r tabs
+  675  cd ..
+  676  git status
+  677  git status
+  678  git status|more
+  679              
+  680  ll
+  681  ll MEDLINE
+  682  git reset MEDLINE/
+  683  git status
+  684  git reset
+  685  git status
+  686  git status|more
+  687  git rm MEDLINE
+  688  git status
+  689  git status
+  690  ll
+  691  ll MEDLINE
+  692  ll MEDLINE
+  693  ll
+  694  cd MEDLINE
+  695  ll
+  696  ll tpl.mdl
+  697  ls tpl.mdl
+  698  ll
+  699  cd ..
+  700  ll
+  701  ll MEDLINE
+  702  ll MEDLINE/tpl.mdl
+  703  ll MEDLINE/tpl.mdl
+  704  git status
+  705  git remote add origin git@github.com:bireme/db-processing.git
+  706  git status 
+  707  git status 
+  708  git 
+  709  ll
+  710  git status
+  711  git reset HEAD MEDLINE/tpl.mdl
+  712  git status
+  713  git reset HEAD MEDLINE/tabs
+  714  git status
+  715  git add MEDLINE
+  716  git commit -m 'MEDLINE'
+  717  git push
+  718  ll
+  719  cd MEDLINE
+  720  ll
+  721  ll tpl.mdl
+  722  cd ..
+  723  ll
+  724  git status
+  725  git reset HEAD MEDLINE
+  726  git status|more
+  727              
+  728  git add MEDLINE/
+  729  git status|more
+  730   
+  731  ll
+  732  git status
+  733  ll
+  734  git status
+  735  git add MEDLINE/tpl.mdl
+  736  git status|more
+  737             
+  738  git pull
+  739  git status
+  740  git status|more
+  741              
+  742  git status|more
+  743               
+  744  git add MEDLINE/tpl.mdl
+  745  git status|more
+  746           
+  747  git pull
+  748  git status
+  749  git add MEDLINE/tpl.mdl
+  750  git status
+  751  git status|more
+  752  git reset --soft HEAD~
+  753  git status
+  754  git stash
+  755  git status
+  756  git status
+  757  clear
+  758* git add 
+  759  git status
+  760  git add MEDLINE/tpl.mdl
+  761  git status
+  762  git log HEAD..origin/master
+  763  git status
+  764  git reset HEAD
+  765  git status
+  766  git add MEDLINE/tpl.mdl/
+  767  git status
+  768  git reset --hard origin/master
+  769  git status
+  770  git add MEDLINE/tpl.mdl/
+  771  git status
+  772  git add MEDLINE
+  773  git status
+  774  git add MEDLINE/tpl.mdl/
+  775  ll
+  776  git status
+  777  cd MEDLINE/
+  778  ll
+  779  ll tpl.mdl
+  780  rm -r bak
+  781  ll
+  782  rm -r tpl.mdl
+  783  cp -r /bases/mdlG4/tpl.mdl .
+  784  ll
+  785  ll tpl.mdl
+  786  cd ..
+  787  ll
+  788  git status
+  789  git add MEDLINE/tpl.mdl/
+  790  git status
+  791  git status
+  792  git reset HEAD MEDLINE/tpl.mdl
+  793  git status
+  794  igit add MEDLINE
+  795  cd MEDLINE/
+  796  ll
+  797  cp -r /bases/mdlG4/tabs .
+  798  cd tabs
+  799  rm -r pmid
+  800  cd ..
+  801  cd ..
+  802  git status
+  803  git add MEDLINE
+  804  git status
+  805  git commit -m "tpl.mdl e tabs"
+  806  git status
+  807  git add MEDLINE
+  808  git status
+  809  git pull
+  810  git status
+  811  git status
+  812  git add MEDLINE
+  813  git status
+  814  history > h1
+  815  vi h1
+  816  git reset --hard origin/master
+  817  git status
+  818  git add MEDLINE
+  819  git status
+  820  vi h1
+  821  ll
+  822  git status
+  823  git reset --hard origin/master
+  824  git status
+  825  git pull
+  826  git status
+  827  git add MEDLINE
+  828  git status
+  829  cd  MEDLINE
+  830  ll
+  831  ll tabs
+  832  ll tpl.mdl
+  833  ll
+  834  ll
+  835  rm -r tabs
+  836  rm -r tpl.mdl
+  837  ll
+  838  cp -r /bases/mdlG4/tabs .
+  839  cp -r /bases/mdlG4/tpl.mdl .
+  840  ll
+  841  ll tpl.mdl
+  842  cd ..
+  843  ll
+  844  git add MEDLINE
+  845  git reset HEAD MEDLINE/tabs/pmid
+  846  git status
+  847  git reset MEDLINE
+  848  git status
+  849  cd MEDLINE
+  850  ll
+  851  ll tabs
+  852  cd tabs
+  853  ll pmid
+  854  rm -r  pmid
+  855  cd ..
+  856  ll
+  857  cd ..
+  858  run
+  859  ll
+  860  cd MEDLINE
+  861  ll
+  862  ll tabs
+  863  ll tpl.mdl
+  864  cd tpl.mdl
+  865  cp /bases/mdlG4/tpl.mdl/* .
+  866  cd ..
+  867  cd ..
+  868  gitstatus
+  869  git status
+  870  ll
+  871  git commit -m "tpl.mdl e tabs"
+  872  git add MEDLINE
+  873  git commit -m "tpl.mdl e tabs"
+  874  git status
+  875  ll MEDLINE/tabs
+  876  ll
+  877  git status
+  878  git pull
+  879  git status
+  880  git reset --hard HEAD~
+  881  gir status
+  882  git status
+  883  cd MEDLINE/
+  884  ll tpl.mdl
+  885  ll tabs
+  886  cd tabs
+  887  icp -r /bases/mdlG4/tabs .
+  888  cd ..
+  889  rm -r tabs
+  890  cp -r /bases/mdlG4/tabs .
+  891  icp -r /bases/mdlG4/tpl.mdl .
+  892  ll
+  893  rm -r tpl.mdl
+  894  cp -r /bases/mdlG4/tpl.mdl .
+  895  ll
+  896  cd ..
+  897  git status
+  898  git stash
+  899  git status
+  900  git push 
+  901  git status
+  902  git init
+  903  ll
+  904  more README.md
+  905  git add README.md
+  906  git status
+  907  git commit -m "tpl.mdl e tabs"
+  908  git commit -m "first commit"
+  909  git add README.md
+  910  git status
+  911  git status
+  912  git status
+  913  git status
+  914  ll
+  915  git add README.md
+  916  git status
+  917  git add README.md
+  918  git status
+  919  git push -u origin/master
+  920  git status
+  921  ll
+  922  git add README.md
+  923  git status
+  924  git pull
+  925  ll
+  926  git add h1
+  927  git status
+  928  git commit -m "leva h1"
+  929  git push origin master
+  930  ll
+  931  vi h1
+  932  git status
+  933  git add MEDLINE
+  934  git status
+  935  git checkout -- MEDLINE
+  936  git status
+  937  git status
+  938  ll
+  939  grep MEDLINE h1.github.vinicius
+  940  git reset HEAD MEDLINE
+  941  git status
+  942  cd tabs
+  943  ll
+  944  cd MEDLINE/
+  945  ll tabs
+  946  cd tabs
+  947  rm -r pmid
+  948  cd ..
+  949  cd ..
+  950  git add MEDLINE
+  951  git status
+  952  git commit -m "leva tpl.mdl e tabs"
+  953  git push origin master
+  954  git status
+  955  git push origin master
+  956  git status
+  957  ll MEDLINE/tabs
+  958  ll
+  959  git status
+  960  git reset HEAD MEDLINE
+  961  git status
+  962  git push origin master
+  963  git status
+  964  git reset --soft HEAD~
+  965  git status
+  966  git reset HEAD MEDLINE
+  967  git status
+  968  git stash
+  969  cd MEDLINE
+  970  ll
+  971  rm -r tabs
+  972  cd ..
+  973  ll MEDLINE/tpl.mdl
+  974  git add MEDLINE
+  975  git stash
+  976  git status
+  977  git reset HEAD MEDLINE
+  978  ll
+  979  git status
+  980  git reset --soft HEAD~
+  981  git status
+  982  git reset HEAD MEDLINE
+  983  git status
+  984  git reset --soft HEAD~
+  985  git reset HEAD MEDLINE
+  986  ll
+  987  git status
+  988  ll MEDLINE/tpl.mdl
+  989  cd tpl.mdl
+  990  cd MEDLINE
+  991  ll
+  992  cd tpl.mdl
+  993  cp -r /bases/mdlG4/tpl.mdl .
+  994  ll
+  995  cd ..
+  996  rm -r tpl.mdl
+  997  cp -r /bases/mdlG4/tpl.mdl .
+  998  ll
+  999  cd ..
+ 1000  git status
+ 1001  git status
+ 1002  git add MEDLINE
+ 1003  git status
+ 1004  ll MEDLINE/tpl.mdl
+ 1005  git status
+ 1006  git checkout MEDLINE
+ 1007  git status
+ 1008  git push origin master
+ 1009  git status
+ 1010  ll MEDLINE/tpl.mdl
+ 1011  git status
+ 1012  git reset HEAD MEDLINE
+ 1013  ll
+ 1014  ll MEDLINE/tpl.mdl
+ 1015  git status
+ 1016  git add MEDLINE/tpl.mdl
+ 1017  git status
+ 1018  git push origin master
+ 1019  git pull
+ 1020  git add MEDLINE/tpl.mdl
+ 1021  git status
+ 1022  ll MEDLINE
+ 1023  ll MEDLINE/tpl.mdl
+ 1024  git status
+ 1025  history > h2
