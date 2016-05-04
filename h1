@@ -1,0 +1,500 @@
+  315  cd bde.lil
+  316  ll
+  317  cd ..
+  318  ll
+  319  cd bde.lil
+  320  cd ..
+  321  ll -tcr
+  322  cd bde.lil
+  323  ll
+  324  ll ../tpl.bde/
+  325  ll ../tpl.bde/processa_BDENF.sh
+  326  ../tpl.bde/processa_BDENF.sh
+  327  rm n*out
+  328  nohup ../tpl.bde/processa_BDENF.sh &
+  329  tail -f n*out
+  330  cd ..
+  331  vi ../tpl.lil/genrelbde.sh
+  332  vi ../tpl.lil/genrelbde.sh
+  333  vi ../tpl.lil/genrelbde.sh
+  334  ll ../tpl.lil/genrelbde.sh
+  335  cd ../tpl.lil
+  336  cd -
+  337  ll ../tpl.lil/genrelbde.sh
+  338  vi ../tpl.lil/genrelbde.sh
+  339  su - tomcat
+  340  run
+  341  ll
+  342  vi ../tpl.bde/processa_BDENF.sh 
+  343  vi ../tpl.bde/iahh_BDENF.sh
+  344  vi ../tpl.bde/processa_BDENF.sh 
+  345  vi ../tpl.bde/iah_BDENF.sh
+  346  vi ../tpl.lil/genothlil.sh
+  347  vi ../tpl.lil/genrelbde.sh
+  348  vi ../tpl.lil/genothlil.sh
+  349  ../tpl.lil/genrelbde.sh
+  350  ll
+  351  vi ../tpl.bde/processa_BDENF.sh 
+  352  vi ../tpl.bde/processa_BDENF.sh 
+  353  vi ../tpl.bde/iah_BDENF.sh
+  354  vi ../tpl.lil/genothlil.sh
+  355  ../tpl.bde/processa_BDENF.sh 
+  356  mkdir /bases/estatis
+  357  ll /bases/estatisticas/
+  358  ll -tcr /bases/estatisticas/
+  359  cd /bases/estatisticas/
+  360  cd  ..
+  361  ll
+  362  ll estatisticas/
+  363  cd estatisticas/
+  364  ld
+  365  ll 201604
+  366  cd 201604
+  367  ll
+  368  ll *bde*
+  369  LIL
+  370  cd bde.lil
+  371  vi ../tpl.bde/processa_BDENF.sh 
+  372  vi ../tpl.bde/iah_BDENF.sh
+  373  vi ../tpl.bde/processa_BDENF.sh 
+  374  ../tpl.bde/processa_BDENF.sh 
+  375  ll
+  376  more ../tpl.bde/processa_BDENF.sh 
+  377  vi ../tpl.bde/processa_BDENF.sh 
+  378  vi ../tpl.bde/iah_BDENF.sh
+  379  vi ../tpl.lil/genothlil.sh
+  380  ../tpl.lil/genrelbde.sh
+  381  vi ../tpl.lil/genothlil.sh
+  382  ll ../bde.tes
+  383  ../tpl.lil/genothlil.sh bde
+  384  ll
+  385  ll ../tpl.bde
+  386  more ../tpl.bde/processa_BDENF.sh
+  387  ../tpl.bde/processa_BDENF.sh
+  388  ll
+  389  ls
+  390  ll
+  391  cd /bases/estatisticas/
+  392  ll -tcr
+  393  LIL
+  394  cd bde.lil
+  395  ll
+  396  cd /bases
+  397  ll
+  398  cd github/
+  399  ll
+  400  ssh 10.188.1.178
+  401  ll -a
+  402  cd
+  403  ll 
+  404  vi .profile
+  405  ssh 10.188.1.178
+  406  run
+  407  ll
+  408  cd /
+  409  exit
+  410  MDL
+  411  ls
+  412  cd v87.lil
+  413  ll lxp*iso
+  414  more mar
+  415  ./mar
+  416  mx lxp_mdl "pft=v2/" now
+  417  mx lxp_mdl "pft=v2/" now|sort -u
+  418  mx lxp_mdl "pft=v2/" now|sort -u
+  419  mx lxp_mdl "pft=v2/" now|sort -u|wc
+  420  exit
+  421  run
+  422  df
+  423  run
+  424  MDL
+  425  cd v87.lil
+  426  ll
+  427  ll lxp*iso
+  428  ssh check@producao
+  429  ssh check@bases
+  430  su - tomcat
+  431  LIL
+  432  ll
+  433  rm -r bvs.bre
+  434  rm -r bvs.sms
+  435  ll bvs.sessp
+  436  rm -r bvs.sessp
+  437  df
+  438  ssh serverofi4
+  439  ll bvs.carpha
+  440  rm -r bvs.carpha
+  441  du enf.iah
+  442  rm -r enf.iah
+  443  cd tpl.bde
+  444  ll
+  445  more iahx_xml_BDENF.sh
+  446  cd ..
+  447  rm -r bvs.fio
+  448  rm -r bvs.equ
+  449  ll enf.iah
+  450  rm -r bvs.ssp
+  451  rm -r bvs.sus
+  452  run
+  453  ll -d *.iah
+  454  rm -r all.iah/ psp.iah/
+  455  ll -d bvs.*
+  456  rm -r bvs.ghl/ bvs.hai/ bvs.sti.desativada/ bvs.vip.desativadoOprocessamento/
+  457  ll -d bvs.*
+  458  IAH
+  459  ll viaria
+  460  scp *.* serverofi4:/bases/iahx/xml-inbox/viaria
+  461  scp *.* serverofi4:/bases/iahx/xml-inbox/viaria
+  462  cd viaria
+  463  scp *.* serverofi4:/bases/iahx/xml-inbox/viaria
+  464  exit
+  465  ssh serverofi4
+  466  run
+  467  ps -ef
+  468  ps -ef|grep rys
+  469  su - tomcat
+  470  run
+  471  run
+  472  exit
+  473  LIL
+  474  cd tabs
+  475  emailITI.sh lil
+  476  exit
+  477  ssh transfer@trigramas2.bireme.br
+  478  ssh transfer@trigramas.bireme.br
+  479  exit
+  480  ssh transfer@trigramas.bireme.br
+  481  ssh transfer@serverw
+  482  ssh transfer@serverw2
+  483  exit
+  484  MDL
+  485  cd v87.lil
+  486  ll *sh
+  487  ./trazLILACSlxp_mdl.sh
+  488  ./trocam2l.sh
+  489  ll *sh
+  490  more levaLILACS.sh
+  491  scp LILACS.* cdrom@serverabd2:/home/lilacs/www/bases/lildbi/dbcertif/lilacs
+  492  ll *sh
+  493  vi genmdltr1.sh
+  494  rm n*out
+  495  nohup ./genm2lall.sh &
+  496  tail -f n*out
+  497  ll -d lil*
+  498  run
+  499  run
+  500  MDL
+  501  ll
+  502  ls
+  503  LIL
+  504  du -h 
+  505  du -h tabs
+  506  MDL
+  507  du -h tabs
+  508  du -h tpl.mdl
+  509  du -h v87.lil
+  510  run
+  511  ps -ef
+  512  ls
+  513  cd v87.lil
+  514  ll lxp*iso
+  515  more mar
+  516  mx lxp_mdl +control
+  517  ./mar
+  518  ll -tcr
+  519  mx lxp_mdl +control
+  520  mx lxp_mdl "pft=v2/" now|sort -u|wc
+  521  LIL
+  522  run
+  523  cd /bases
+  524  ll
+  525  ll -tcr
+  526  find ./ -name db*
+  527  cd /bases
+  528  ll
+  529  mkdir dbprocessing
+  530  cd dbprocessing
+  531  ll
+  532  mkdir medline
+  533  cd medline
+  534  ll
+  535  cd /bases/mdlG4
+  536  cd tpl.mdl
+  537  ls
+  538  cd /bases/lilG4
+  539  cd tpl.lil
+  540  cd /bases
+  541  ll
+  542  ll /usr/local
+  543  ll /usr/local/proc
+  544  ll /usr/local/procs
+  545  ll /usr/local/bireme/procs
+  546  cd /bases
+  547  ll
+  548  MDL
+  549  cd /bases
+  550  cd github/
+  551  ll
+  552  cd db-processing/
+  553  ll
+  554  cd MEDLINE
+  555  ll
+  556  ll tpl.mdl
+  557  ll
+  558  ll tpl.mdl/
+  559  cd tpl.mdl/
+  560  ll
+  561  ls
+  562  cd ..
+  563  diff tpl.mdl /bases/mdlG4/tpl.mdl
+  564  ll
+  565  ll
+  566  cd ..
+  567  ll
+  568  cd MEDLINE
+  569  ll
+  570  ll tpl.mdl
+  571  cd ..
+  572  ll
+  573  more h1.github.vinicius
+  574  more h1.github.vinicius
+  575  ll
+  576  git add MEDLINE
+  577  git status
+  578  MDL
+  579  ll -d tpl*
+  580  rm -r tpl.mdl.oficial/
+  581  cp -r tpl.mdl/ tpl.mdl.oficial
+  582  cd -
+  583  ll
+  584  ll TESTE
+  585  ll
+  586  cd MEDLINE
+  587  ll
+  588  cd ..
+  589  rm -r MEDLINE/tpl.mdl
+  590  MDL
+  591  scp -r tpl.mdl serverofi4:/bases/mdlG4
+  592  cd -
+  593  ll
+  594  cd MEDLINE
+  595  ll
+  596  cd ..
+  597  git reset HEAD MEDLINE
+  598  git status
+  599  cd MEDLINE
+  600  ll
+  601  ll
+  602  cd ..
+  603  ll
+  604  ll .git
+  605  ls -Ri */.git/objects
+  606  ls -Ri .git/objects
+  607  ls .git/objects
+  608  ll .git/objects
+  609* 
+  610  ls -R .git/objects
+  611  ls -Ri .git/objects
+  612  ll
+  613  cd MEDLINE
+  614  ln /bases/mdlG4/tpl.mdl.oficial tpl.mdl
+  615  ll
+  616  ll
+  617  cd ..
+  618  ll MEDLINE
+  619  cd MEDLINE
+  620  ll
+  621  cd ..
+  622  ll
+  623  mkdir MEDLINE
+  624  ll
+  625  cd MEDLINE
+  626  ll
+  627  cp -r /bases/mdlG4/tpl.mdl .
+  628  cp -r /bases/mdlG4/tabs .
+  629  cd tabs
+  630  ll -Sr
+  631  rm decs.*
+  632  du -h
+  633  rm -r pmid
+  634  du -h
+  635  cd ..
+  636  cd ..
+  637  git status
+  638  git add MEDLINE
+  639  git status
+  640  git commit -m "tpl.mdl e tabs"
+  641  git status
+  642  git remote add MEDLINE git@github.com:bireme/db-processing.git
+  643  git status
+  644  git status
+  645  git remote add origin git@github.com:bireme/db-processing.git
+  646  git status
+  647  git add MEDLINE
+  648  git status
+  649  git status
+  650  git status
+  651  git add MEDLINE
+  652  git status
+  653  clear
+  654  git status
+  655  ll
+  656  git add MEDLINE/tpl.mdl
+  657  git status
+  658  git status
+  659  git status
+  660  git reset HEAD MEDLINE
+  661  git status
+  662  git reset HEAD MEDLINE
+  663  git add MEDLINE
+  664  git status
+  665  git add MEDLINE/tabs
+  666  git status
+  667  git add MEDLINE/tpl.mdl
+  668  git status
+  669  git reset
+  670  git status
+  671  git status
+  672  cd MEDLINE
+  673  ll
+  674  rm -r tabs
+  675  cd ..
+  676  git status
+  677  git status
+  678  git status|more
+  679              
+  680  ll
+  681  ll MEDLINE
+  682  git reset MEDLINE/
+  683  git status
+  684  git reset
+  685  git status
+  686  git status|more
+  687  git rm MEDLINE
+  688  git status
+  689  git status
+  690  ll
+  691  ll MEDLINE
+  692  ll MEDLINE
+  693  ll
+  694  cd MEDLINE
+  695  ll
+  696  ll tpl.mdl
+  697  ls tpl.mdl
+  698  ll
+  699  cd ..
+  700  ll
+  701  ll MEDLINE
+  702  ll MEDLINE/tpl.mdl
+  703  ll MEDLINE/tpl.mdl
+  704  git status
+  705  git remote add origin git@github.com:bireme/db-processing.git
+  706  git status 
+  707  git status 
+  708  git 
+  709  ll
+  710  git status
+  711  git reset HEAD MEDLINE/tpl.mdl
+  712  git status
+  713  git reset HEAD MEDLINE/tabs
+  714  git status
+  715  git add MEDLINE
+  716  git commit -m 'MEDLINE'
+  717  git push
+  718  ll
+  719  cd MEDLINE
+  720  ll
+  721  ll tpl.mdl
+  722  cd ..
+  723  ll
+  724  git status
+  725  git reset HEAD MEDLINE
+  726  git status|more
+  727              
+  728  git add MEDLINE/
+  729  git status|more
+  730   
+  731  ll
+  732  git status
+  733  ll
+  734  git status
+  735  git add MEDLINE/tpl.mdl
+  736  git status|more
+  737             
+  738  git pull
+  739  git status
+  740  git status|more
+  741              
+  742  git status|more
+  743               
+  744  git add MEDLINE/tpl.mdl
+  745  git status|more
+  746           
+  747  git pull
+  748  git status
+  749  git add MEDLINE/tpl.mdl
+  750  git status
+  751  git status|more
+  752  git reset --soft HEAD~
+  753  git status
+  754  git stash
+  755  git status
+  756  git status
+  757  clear
+  758* git add 
+  759  git status
+  760  git add MEDLINE/tpl.mdl
+  761  git status
+  762  git log HEAD..origin/master
+  763  git status
+  764  git reset HEAD
+  765  git status
+  766  git add MEDLINE/tpl.mdl/
+  767  git status
+  768  git reset --hard origin/master
+  769  git status
+  770  git add MEDLINE/tpl.mdl/
+  771  git status
+  772  git add MEDLINE
+  773  git status
+  774  git add MEDLINE/tpl.mdl/
+  775  ll
+  776  git status
+  777  cd MEDLINE/
+  778  ll
+  779  ll tpl.mdl
+  780  rm -r bak
+  781  ll
+  782  rm -r tpl.mdl
+  783  cp -r /bases/mdlG4/tpl.mdl .
+  784  ll
+  785  ll tpl.mdl
+  786  cd ..
+  787  ll
+  788  git status
+  789  git add MEDLINE/tpl.mdl/
+  790  git status
+  791  git status
+  792  git reset HEAD MEDLINE/tpl.mdl
+  793  git status
+  794  igit add MEDLINE
+  795  cd MEDLINE/
+  796  ll
+  797  cp -r /bases/mdlG4/tabs .
+  798  cd tabs
+  799  rm -r pmid
+  800  cd ..
+  801  cd ..
+  802  git status
+  803  git add MEDLINE
+  804  git status
+  805  git commit -m "tpl.mdl e tabs"
+  806  git status
+  807  git add MEDLINE
+  808  git status
+  809  git pull
+  810  git status
+  811  git status
+  812  git add MEDLINE
+  813  git status
+  814  history > h1
