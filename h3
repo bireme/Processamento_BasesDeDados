@@ -1,6 +1,0 @@
-git reset --soft HEAD~
-git reset HEAD MEDLINE/tpl.mdl
-git status
-git add MEDLINE
-git commit -m 'MEDLINE tpl'
-git push
