@@ -1,0 +1,139 @@
+# ------------------------------------------------------------------------ #
+# GENMDLEX - Template para geracao dos invertidos EX (tres idiomas).
+#
+# Marcelo - 08/06/94 
+# Execucao - Processamento
+# sintaxe: "genmdlex <dbn_mdlbb> <dbn_decsex> <dbn_decs> <tree_aut_mh>
+#                    <tree_decs_field720>"
+#    onde:
+#         <dbn_mdlbb> base de dados MEDLINE sem ABSTARCT (mdlbb).
+#         <dbn_decsex> base de dados decsex.
+#         <dbn_decs> base de dados DECS.
+#         <tree_inv> Invertido autorizado do DECS.
+#         <tree_decs_field720> Invertido do DECS pelo campo 720.
+#
+# ------------------------------------------------------------------------ #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlex"
+echo
+
+if 
+  [ "$#" -ne 5 ]
+then
+  TPR="fatal"
+  MSG="Use: genmdlex <dbn_mdlbb> <dbn_decsex> <dbn_decs> <tree_aut> <tree_decs_field_720>"
+ . log
+fi
+
+decsextree () {
+
+	TPR="iffatal"
+	MSG="Erro na classificacao $WLN1 na funcao decsextree" 
+	genlk -s $WLK1 $WLN1
+	. log
+
+        rm mdlex$i.ln1
+
+
+	TPR="iffatal"
+	MSG="Erro na classificacao $WLN2 na funcao decsextree" 
+	genlk -s $WLK2 $WLN2
+	. log
+
+        rm mdlex$i.ln2
+
+	MSG="Erro na carga do invertido $WTREE na funcao decsextree" 
+	iflind mdlex$i $WLK1 $WLK2 master=$WDBN +fix
+        #geninv $WDBN $WTREE $WLK
+	. log
+
+        if  [ $i != 'i' ]
+	then
+	    MSG="Erro no reapontamento pelo ifp1 na funcao decsextree" 
+            ifp1 mdlexi $WTREE $WTREE.lst 
+	    . log
+	    MSG="Erro na copia do mdlexi.iyp" 
+	    cp mdlexi.iyp $WTREE.iyp
+	    . log
+        fi
+
+	MSG="Erro no crunch da arvore $WTREE na funcao decsextree" 
+        crunch $WTREE ifp
+	. log
+
+	MSG="Erro na geracao do WTREE.iy0 pelo geniy0 na funcao decsextree" 
+        geniy0 pc/$WTREE no
+	. log
+
+}
+
+# ----------------------------------------------------------------------- #
+# Execucao decsex
+# ----------------------------------------------------------------------- #
+
+cat>$3par<<!
+$3.mst=../tabs/$3.mst
+$3.xrf=../tabs/$3.xrf
+$3.cnt=../tabs/$5.cnt
+$3.iyp=../tabs/$5.iyp
+$3.ly1=../tabs/$5.ly1
+$3.ly2=../tabs/$5.ly2
+$3.n01=../tabs/$5.n01
+$3.n02=../tabs/$5.n02
+!
+CIPAR=$3par
+export CIPAR
+
+TPR="iffatal"
+MSG="Error: decsex"
+decsex ../tabs/$2 $4 $3 mdlexi.ln1 mdlexi.ln2 mdlexe.ln1 mdlexe.ln2 mdlexp.ln1 mdlexp.ln2 > decsex.log
+. log
+
+mv decsex.lst  mdlex.lst
+mv decsexI.lst mdlexi.lst
+mv decsexE.lst mdlexe.lst
+mv decsexP.lst mdlexp.lst
+
+# ----------------------------------------------------------------------- #
+# Geracao dos invertidos EXI, EXE e EXP
+# ----------------------------------------------------------------------- #
+
+DIRPRODUTO=`pwd`
+DIREDICAO=`echo $DIRPRODUTO|cut -f3 -d\/`
+
+for i in i e p
+do
+
+  WLN1=mdlex$i.ln1
+  WLN2=mdlex$i.ln2
+  WLK1=mdlex$i.lk1
+  WLK2=mdlex$i.lk2
+  WDBN=$1
+  WTREE=mdlex$i
+  WLK=mdlex$i
+  WAUT=$4
+  decsextree
+  rm mdlex$i.lk*
+done  
+
+rm $3par
+rm mdlmh.*
+rm decsex.log
+rm mdlex?.lst
+cd pc
+mv mdlexi.iyp mdlex.iyp
+rm mdlexe.iyp mdlexp.iyp
+cd ..
+
+unset CIPAR
+
+echo
+echo "Fim genmdlex"
+echo
+
+TPR="end"
+. log

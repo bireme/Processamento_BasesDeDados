@@ -1,0 +1,156 @@
+# -------------------------------------------------------------------- #
+# GENDECS9BMH - Procedimento para geracao da arvores MH por idioma
+#               (MHI, MHE, MHP). 
+#               Este procedimento deve ser executado apos o GENDESC9A.
+#
+# Marcelo - 20/06/94
+# Execucao - Processamento
+# Sintaxe: gendecs9bmh <rad_tree_aut_mh> <dbn_decs> <tree_aut_mh> 
+#                      <tree_decs_field701> [-bug2]
+# onde:
+#  <rad_tree_aut_mh> e o radical dos nomes dos invertidos MH por idioma
+#  <dbn_decs> o nome do decs utilizado para traducao
+#  <tree_aut_mh> e o nome da arvore de invertido autorizado
+#  <tree_decs_field701> e o nome da arvore do decs 
+#  [-bug2] e uma opcao do decs9b especifica para processamento da LIlLACS 
+# ------------------------------------------------------------------- # 
+
+# ------------------------------------------------------------------- #
+# FUNCOES 
+# ------------------------------------------------------------------- #
+
+# ------------------------------------------------------- #
+# decs9btree -> Gera invertido por idioma utilizando ifp1 #
+# ------------------------------------------------------- #
+
+decs9btree () {
+
+	TPR="iffatal"
+        MSG="Erro na classificacao $WLN1 na funcao decs9btree" 
+	genlk -s $WLK1 $WLN1
+	. log
+
+	TPR="iffatal"
+	MSG="Erro na classificacao $WLN2 na funcao decs9btree" 
+	genlk -s $WLK2 $WLN2
+	. log
+
+        if  [ "$i" = "c" ]
+	then
+            TPR="iffatal"
+	    MSG="Erro no grep $WLK1 na funcao decs9btree" 
+	    grep -v "/" $WLK1 > wlkmhc.lk1
+            . log
+
+	    TPR="iffatal"
+	    MSG="Erro no grep $WLK2 na funcao decs9btree" 
+	    grep -v "/" $WLK2 > wlkmhc.lk2
+	    . log
+
+	    mv -f wlkmhc.lk1 $WLK1 
+	    mv -f wlkmhc.lk2 $WLK2
+        fi
+
+	MSG="Erro na carga do invertido $WTREE na funcao decs9btree" 
+        geninv $WDBN $WTREE $WLK
+	. log
+
+	MSG="Erro no reapontamento pelo ifp1 na funcao decs9btree" 
+        ifp1 $WAUT $WTREE $WTREE.lst 
+	. log
+	cp $WAUT.iyp $WTREE.iyp
+
+	MSG="Erro no crunch da arvore $WTREE na funcao decs9btree" 
+        crunch $WTREE ifp
+	. log
+
+	MSG="Erro na geracao do WTREE.iy0 pelo geniy0 na funcao decs9btree" 
+        geniy0 pc/$WTREE no
+	. log
+
+}
+
+
+# ------------------------------------------------------------------- #
+# Geracao dos arquivos lns pelo decs9b
+# ------------------------------------------------------------------- #
+
+TPR="start"
+. log
+
+if [ "$#" -lt 4 -o "$#" -gt 5 ]
+then 
+  TPR="fatal"
+  MSG="use: gendecs9bmh <rad_tree_aut_mh> <dbn_decs> <tree_aut_mh> <tree_decs_field701> [-bug2]"
+  . log
+fi
+
+if [ -n "$5" -a "$5" != "-bug2" ]
+then 
+  TPR="fatal"
+  MSG="parm5: -bug2"
+  . log
+fi
+
+cat>$2par<<!
+$2.mst=../tabs/$2.mst
+$2.xrf=../tabs/$2.xrf
+$2.cnt=../tabs/$4.cnt
+$2.iyp=../tabs/$4.iyp
+$2.ly1=../tabs/$4.ly1
+$2.ly2=../tabs/$4.ly2
+$2.n01=../tabs/$4.n01
+$2.n02=../tabs/$4.n02
+!
+CIPAR=$2par
+export CIPAR
+
+TPR="iffatal"
+MSG="Erro na extracao dos lns pelo decs9b"
+decs9b $3 $2 $1i.ln1 $1i.ln2 $1e.ln1 $1e.ln2 $1p.ln1 $1p.ln2 $1c.ln1 $1c.ln2 $5
+. log
+
+mv decs9b.lst  $19b.lst
+mv decs9bI.lst $1i.lst
+mv decs9bE.lst $1e.lst
+mv decs9bP.lst $1p.lst
+mv decs9bC.lst $1c.lst
+
+
+TPR="iffatal"
+MSG="Erro mx: geracao (filtro do arquivo gerado pelo decs9b) do arquivo mdlmhc.lst"
+mx seq=$1c.lst lw=1024 "pft=if (v2.1<>'/' and v7.1<>'/' or v5.1='Q') then v1'|'v2'|'v3'|'v4'|'v5'|'v6'|'v7'|'v8'|'v9'|'v10'|'v11'|'v12/ fi" tell=10000 -all now > $1cb.lst
+. log
+#grep -v "/" $1c.lst > $1cb.lst    (antigo gendecs9bmh (gendecs9bmhb))
+mv $1cb.lst $1c.lst
+
+for i in i e p c
+do
+  cut -c1-25 $1$i.ln1 > $1$i.lf1
+  cut -c1-69 $1$i.ln2 > $1$i.lf2
+
+  rm $1$i.ln1 $1$i.ln2
+
+  mv $1$i.lf1 $1$i.ln1
+  mv $1$i.lf2 $1$i.ln2
+
+  WLN1=$1$i.ln1
+  WLN2=$1$i.ln2
+  WLKC1=$1$i.ln1
+  WLKC2=$1$i.ln2
+  WLK1=$1$i.lk1
+  WLK2=$1$i.lk2
+  WDBN=$2
+  WTREE=$1$i
+  WLK=$1$i
+  WAUT=$3
+  decs9btree
+  rm $1$i.ln*
+  rm $1$i.lk*
+done  
+
+rm $2par
+unset CIPAR
+
+TPR="end"
+. log

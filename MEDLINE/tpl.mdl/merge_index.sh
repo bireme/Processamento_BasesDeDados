@@ -1,0 +1,5 @@
+TPR="iffatal"
+MSG="Erro: genmerginv.sh - $MDL_BASELINE2DIGITOS $MDL_ANOCORRENTE2DIGITOS"
+./tpl.mdl/genmerginv_one.sh "$MDL_BASELINE2DIGITOS $MDL_ANOCORRENTE2DIGITOS"
+. log
+

@@ -1,0 +1,75 @@
+# --------------------------------------------------------------------------- #
+# GEN950LST - Procedimento para geracao do arquivo "mdlmhiappd.lst"
+#
+# Marcelo - 27/01/97
+# Execucao - Produto-Edicao/TABS
+# Sintaxe: gen950lst <dbn_decs> 
+#   onde:
+#          <dbn_decs> e o nome da base de dados DECS.
+# -------------------------------------------------------------------------- #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: gen950lst"
+echo
+
+if [ "$#" -ne 1 ]
+then
+  TPR="fatal"
+  MSG="use: gen950lst <dbn_decs>"
+  . log
+fi
+
+# Verifica existencia da base DECS
+
+for i in $1 
+do
+    if 
+      [ ! -f $i.xrf ]
+    then
+      TPR="fatal"
+      MSG="$i.xrf not found"
+      . log
+    fi
+done
+
+
+# -------------------------------------------------------------------------- #
+# Desmembramento do 950 do DECS  
+# -------------------------------------------------------------------------- #
+
+echo
+echo "Executing mxcp..."
+echo
+
+TPR="iffatal"
+MSG="Erro mxcp: desmembramento do 950."
+mxcp $1 create=$1tmp repeat=' ',950
+. log
+
+# -------------------------------------------------------------------------- #
+# Geracao do arquivo "mdlmhiappd.lst"   
+# -------------------------------------------------------------------------- #
+
+# tab950.pft
+echo "(if p(v950) then mfn,'|',v1[1],'|I|a|',v1[1],'|  |/',v950,'|  | |1|1|0'/ fi), (if p(v950) then mfn,'|',v1[1],'|I|a|',v1[1],'|. |/',v950,'|  | |1|1|0'/ fi)" > tab950.pft
+
+
+TPR="iffatal"
+MSG="Erro na geracao da arvore tdecs9a"
+mx $1tmp lw=9999 "pft=@tab950.pft" -all now tell=1000 > mdlmhiappd.lst
+. log
+
+rm $1tmp.mst $1tmp.xrf 
+rm tab950.pft
+
+
+echo
+echo "Fim: gen950lst"
+echo
+
+TPR="end"
+. log
+

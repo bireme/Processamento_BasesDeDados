@@ -1,0 +1,103 @@
+#!/bin/bash
+
+
+if [ "$#" -ne 2 ]
+then
+   TPR="fatal"
+   MSG="use: genupdatemdl.sh <dbn> <dbn_NAMEIN_update>"
+   . log
+fi
+
+if [ ! -f $1.xrf ]
+then
+   MSG="$1.xrf nao encontrado"
+   TPR="fatal"
+   . log
+fi
+if [ ! -f ../fasea/update_isis/$2.xrf ]
+then
+   MSG="../fasea/update_isis/$2.xrf nao encontrado"
+   TPR="fatal"
+   . log
+fi
+
+# Gera a estrutura do MST de INDEX
+  echo "mstxl=64G" > mdlxl.par
+  CIPAR=mdlxl.par
+  export CIPAR
+
+# prepara arquivo .TAB para reatg 1
+mx tmp "pft=f(val(mfn),1,0),x1,f(val(mfn)+1000,1,0)/" from=1 to=999 -all now > mdl1.tab
+
+# retag do master de browse para preservar os campos antigos na faixa do 1000 ao 1999
+echo "retag 1..."
+TPR="iffatal"
+MSG="retag $1.xrf"
+retag $1 mdl1.tab
+. log
+
+
+# Relatório dos trocados
+echo "relatorio dos documentos atualizados - $1..."
+TPR="iffatal"
+MSG="MDLUPDATE: Relatorio dos trocados - $1"
+if [ "$1" = "mdl" ]
+then
+   echo $1...
+   IMDL=`echo $2|sed 's/bmd/imd/'`
+   echo $IMDL
+cat>bmdl.cip<<!
+$2.mst=../fasea/update_isis/$2.mst
+$2.xrf=../fasea/update_isis/$2.xrf
+$2.cnt=../fasea/update_isis/$IMDL.cnt
+$2.iyp=../fasea/update_isis/$IMDL.iyp
+$2.ly1=../fasea/update_isis/$IMDL.ly1
+$2.ly2=../fasea/update_isis/$IMDL.ly2
+$2.n01=../fasea/update_isis/$IMDL.n01
+$2.n02=../fasea/update_isis/$IMDL.n02
+!
+   #mx cipar=bmdl.cip $1 "join=../fasea/update_isis/$2=v1999^3/" jmax=1 "pft=if p(v32001^m) then 'mfn='mfn,x2,'PMID='v999^3/ fi" now -all >> $1.lst
+   mx cipar=bmdl.cip $1 "join=$2=v1999^3/" jmax=1 "pft=if p(v32001^m) then 'mfn='mfn,x2,'PMID='v999^3/ fi" now -ll tell=1 >> $1.lst
+   . log
+else
+   echo $1...
+   mx $1 "join=../fasea/update_isis/$2=v1969/" jmax=1 "pft=if p(v32001^m) then 'mfn='mfn,x2,'PMID='v999^3/ fi" now -all >> $1.lst
+   . log
+fi
+
+exit
+
+# Troca registros 
+echo "atualizando documentos..."
+TPR="iffatal"
+MSG="Join $1 com $NAMEIN - $1"
+if [ "$1" = "mdl" ]
+then
+   echo $1...
+   mx $1 "join=../fasea/update_isis/$2=v1999^3/" jmax=1 "proc=@../tabs/mdlupdate.prc" "proc='S'" now -all create=mdlupdate$$ tell=100000
+   . log
+else
+   echo $1...
+   mx $1 "join=../fasea/update_isis/$2=v1969/" jmax=1 "proc=@../tabs/mdlupdate.prc" "proc='S'" now -all create=mdlupdate$$ tell=100000
+   . log
+fi 
+
+ 
+# prepara arquivo .TAB para reatg 1001
+TPR="iffatal"
+MSG="erro geracao mdl1001.tab"
+mx tmp "pft=f(val(mfn)+1000,1,0),x1,f(val(mfn),1,0)/" from=1 to=999 -all now|grep -v 1002 >mdl1001.tab
+. log
+
+echo "retag 1001..."
+TPR="iffatal"
+MSG="retag MDLUPDATE"
+retag mdlupdate$$ mdl1001.tab
+. log
+echo
+
+mv mdlupdate$$.mst $1.mst
+mv mdlupdate$$.xrf $1.xrf
+rm *.tab
+
+

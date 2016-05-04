@@ -1,0 +1,36 @@
+#----------------------------------------------------------------------#
+# GENMDLAB - Procedimento para geracao do invertido JR.
+#
+# Marcelo - 01/03/94 
+# Execucao - Processamento
+# Sintaxe: genmdljr <dbn_mdlbb> <loopcheck>
+#    onde:
+#          <dbn_mdlbb> base de dados MEDLINE sem ABSTRACT.
+#          <loopcheck> intervalo para checks.
+#
+#----------------------------------------------------------------------#
+
+TPR="start"
+. log
+
+if [ "$#" -ne 2 ]
+then 
+   TPR="fatal"
+   MSG="use: genmdljr <dbn_mdlbb> <loopcheck>"
+   . log 
+fi
+
+# -------------------------------------------------------------------- #
+# WRKJR.FST 
+# -------------------------------------------------------------------- #
+cat>mdljr.fst<<!
+300 0 mpl,(|IS |v301/),(|IS |v302/),(|JC |v320/),(|TA |v305/),(|TA |v305"/"v354.4,","v381,"("v373")"/),(|TA |v305"/"v354.4,/)
+!
+
+gentree $1 mdljr $2
+
+rm mdljr.lk1 mdljr.lk2
+rm mdljr.fst
+
+TPR="end"
+. log

@@ -1,0 +1,156 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]
+then
+  TPR="fatal"
+  MSG="Use: $0 <b/i> <ano_corrente> - Ex: $0 b 16 (master de browse) /  $0 i 16 (master de inversao)"
+  . log
+fi
+
+# ----------------------------------------------------------------------- #
+# verifica existencia dos diretorios SDI em FASEA
+# ----------------------------------------------------------------------- #
+if [ ! -d ../fasea/update_isis ]
+then
+  TPR="fatal"
+  MSG="Error: Diretorio nao localizado : ../fasea/update_isis"
+  . log
+fi
+
+# ------------------------------------------------------------------------- #
+# verifica existencia do arquivo de rotulos em FASEA
+# ------------------------------------------------------------------------- #
+if [ ! -s ../fasea/update_isis/labsdi$2$1 ]
+then
+  TPR="fatal"
+  MSG="Erro: ../fasea/update_isis/labsdi$2$1 nao encontrado"
+  . log
+else
+  cp ../fasea/update_isis/labsdi$2$1 labsdi$2$1
+  #tail -44 labsdi$2$1 > labsdi_tmp
+  #mv labsdi_tmp labsdi$2$1
+fi
+
+# recupera o ano do diretorio corrente: m09.mdl (09)
+ANO_Processado=`pwd | cut -d"/" -f4 |cut -c2-3`
+
+case $1 in
+
+         b)     MASTER="mdl"
+                [ -d bmdl_tmp ] && rm -r bmdl_tmp
+                mkdir bmdl_tmp
+                cp mdl.* bmdl_tmp
+                echo "apagando campo 993 de mdl.mst..."
+                mx mdl "proc=if p(v993) then 'd993' fi" -all now copy=mdl tell=300000
+                ;;
+
+         i)     MASTER="mdlbb$ANO_Processado"
+                [ -d imdl_tmp ] && rm -r imdl_tmp
+                mkdir imdl_tmp
+                cp mdlbb$ANO_Processado.* imdl_tmp
+                echo "apagando campo 993 de mdlbb$ANO_Processado..."
+                mx mdlbb$ANO_Processado "proc=if p(v993) then 'd993' fi" -all now copy=mdlbb$ANO_Processado tell=300000
+                ;;
+
+         *)     echo
+                echo "erro: '$1' invalido!!! pode ser b/i (browse/inversao)"
+                echo
+                exit 1
+                ;;
+esac
+
+# ------------------------------------------------------------------------- #
+# verifica existencia do Master MASTER
+# ------------------------------------------------------------------------- #
+if [ ! -f $MASTER.xrf ]
+then
+  TPR="fatal"
+  MSG="Erro: $MASTER.xrf nao encontrado"
+  . log
+fi
+
+
+# ----------------------------------------------------------------------- #
+# Verifica se todos os arquivos do arquivo de LABEL estao presentes
+# ----------------------------------------------------------------------- #
+COUNT=1
+wc -l labsdi$2$1 > qtd
+mx seq=qtd create=qtd -all now
+mxcp qtd create=qtdcp clean log=qtd.log
+LEN=`mx qtdcp "pft=v1/" now|cut -f1 -d" "`
+rm qtd*
+
+while
+     [ $COUNT -le $LEN ]
+do
+     NAMEIN=`head -$COUNT labsdi$2$1|tail -1`
+     echo "$NAMEIN... OK"
+     if  [ ! -f ../fasea/update_isis/$NAMEIN.xrf -o ! -f ../fasea/update_isis/$NAMEIN.cnt ]
+     then
+         TPR="fatal"
+         MSG="../fasea/update_isis/$NAMEIN.xrf/cnt nao encontrado"
+         . log
+     fi
+     COUNT=`expr $COUNT + 1`
+done
+echo
+unset COUNT
+
+# ----------------------------------------------------------------------- #
+#
+# ----------------------------------------------------------------------- #
+COUNT=1
+wc -l labsdi$2$1 > qtd
+mx seq=qtd create=qtd -all now
+mxcp qtd create=qtdcp clean log=qtd.log
+LEN=`mx qtdcp "pft=v1/" now|cut -f1 -d" "`
+rm qtd*
+
+# Deleta relatório anterior se existir
+while
+     [ $COUNT -le $LEN ]
+do
+     NAMEIN=`head -$COUNT labsdi$2$1|tail -1`
+     TPR="iffatal"
+     MSG="../fasea/update_isis/$NAMEIN.xrf not found"
+     if  [ -f ../fasea/update_isis/$NAMEIN.xrf ]
+     then
+         echo "atualizando $MASTER.xrf c/ $NAMEIN.xrf..."
+         ../tpl.mdl/genupdatemdl.sh $MASTER $NAMEIN
+         . log
+     else
+         echo "nao encontrou ../fasea/update_isis/$NAMEIN.xrf"
+         exit 1
+     fi
+     COUNT=`expr $COUNT + 1`
+done
+unset COUNT
+
+# Finaliza atualizacao, acertando campos 370, 854 e 855
+if [ $1 = "i" ]
+then
+   echo "$MASTER - acertando campos 370, 854 e 855..."
+   TPR="iffatal"
+   MSG="erro: acertando campos 370, 854 e 855"
+   mx $MASTER "proc='d370',if p(v370) then 'a370~YES~' fi" "proc=if mfn=1 and p(v354) then putenv('DATE='date) fi" "proc=if p(v354) then 'a1354|'replace(v354,'-',' ')'|' fi" "proc=if p(v354) then 'Gsplit=1354= ' fi" "proc='d1354d854d855',if p(v354) then '<854>'s1:=(v1354[1].4),e1:=l(['../tabs/tab354']v1354[2]),s2:=(if e1>0 then ref(['../tabs/tab354']e1,v2) fi),,,e1:=(val(s(date).4)-1900)*12+val(s(date)*4.2),e2:=(val(s1)-1900)*12+val(s2),,,s1,s2'</854>','<855>'replace(f(e1-e2,4,0),' ','0')'</855>' fi" "proc='S'" create=$MASTER"_tmp" -all now tell=100000
+   . log
+
+   mv $MASTER"_tmp".mst $MASTER.mst
+   mv $MASTER"_tmp".xrf $MASTER.xrf
+
+   echo "969 0 v969/ " > $MASTER.fst
+   TPR="iffatal"
+   MSG="erro na geracao do Invertido - $MASTER"
+   mx $MASTER "fst=@" fullinv/ansi=$MASTER -all now tell=100000
+   . log
+   rm $MASTER.fst
+
+fi
+
+[ -d bmdl_tmp ] && rm -r bmdl_tmp
+[ -d imdl_tmp ] && rm -r imdl_tmp
+
+echo
+echo "acabou!!! atualizado $MASTER em `pwd`"
+
+

@@ -1,0 +1,65 @@
+#----------------------------------------------------------------------#
+# GENMDLAB - Procedimento para geracao do invertido de ABstract.
+#
+# Marcelo - 16/01/09 
+# Execucaco - Processamento
+# Sintaxe: genmdlab <dbn_mdlab> <loopcheck>
+#    onde:
+#          <dbn_mdlab> base de dados MEDLINE (mdlab).
+#          <loopcheck> intervalo para checks.
+#
+#----------------------------------------------------------------------#
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlab"
+echo
+
+if [ "$#" -ne 2 ]
+then 
+   TPR="fatal"
+   MSG="use: genmdlab <dbn_mdlab> <loopcheck>"
+   . log 
+fi
+
+# FST
+cat > mdlab.fst <<!
+5 4 mpl,(v370/)
+!
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do RN"
+$LINDG4/mx $1 "fst=@mdlab.fst" ln1=mdlab.ln1 ln2=mdlab.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do RN"
+genlk -s mdlab.lk1 mdlab.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do RN"
+genlk -s mdlab.lk2 mdlab.ln2
+. log
+
+echo
+echo "Carga MDLAB..."
+echo
+TPR="iffatal"
+MSG="Erro na carga do invertido AB - $1"
+geninv $1 mdlab mdlab
+. log
+
+rm  mdlab.fst
+rm  mdlab.ln1 mdlab.ln2
+rm mdlab.lk1 mdlab.lk2
+
+echo
+echo "Fim: genmdlab"
+echo
+
+TPR="end"
+. log

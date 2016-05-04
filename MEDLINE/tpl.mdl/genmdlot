@@ -1,0 +1,78 @@
+#----------------------------------------------------------------------#
+# GENMDLOT - Procedimento para geracao do invertido OThers.
+#
+# Marcelo - 01/03/94 
+# Execucao - Processamento
+# Sintaxe: genmdlot <dbn_mdlbb> <loopcheck>
+#    onde:
+#          <dbn_mdlbb> base de dados MEDLINE sem ABSTRACT (mdlbb).
+#          <loopcheck> intervalo para checks
+#
+#----------------------------------------------------------------------#
+
+# set da variavel IAHLINKS
+. ../tabs/iahlinks.conf
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlot"
+echo
+
+if [ "$#" -ne 2 ]
+then 
+   TPR="fatal"
+   MSG="use: genmdlot <dbn_mdlbb> <loopcheck>"
+   . log 
+fi
+
+
+# extrai "Date Available" do campo v967 no v2967
+TPR="iffatal"
+MSG="Erro: extrai Date Available do campo v967 no v2967"
+mx $1 "proc=(if v967.3='PMC' and s(mpu,v967,mpl):'AVAILABLE' then 'd1967a1967'right(left(v967,instr(v967,']')-1),instr(v967^**4,'['))'' fi)" "proc=if p(v1967) then 'a2967~'v1967*6.2,v1967.2,v1967*3.2'~' fi" create=$1ot -all now tell=100000
+. log
+
+# set da data do dia corrente
+DATAOFI2=`date +%y%m%d`
+
+# -------------------------------------------------------------------- #
+# WRKOT.FST 
+# -------------------------------------------------------------------- #
+# 352 8 mpl,'|TI |'v352 (W/W prefixado)
+# 968 0 mpl,(if p(v968) then |FT |v968^a/ fi)
+cat>mdlot.fst<<!
+969 0 mpl,|UI |v969/
+102 0 mpl,|LR |v102
+383 0 mpl,|EM |v383*2.4
+103 0 mpl,|CU |v103
+354 0 mpl,|DP |v354*0.4
+379 0 mpl,(|PS |v379/)
+261 0 mpl,(|RN |v261^a/)
+261 0 mpl,(|RN |v261^b/)
+328 0 mpl,(|GS |v328/)
+324 0 mpl,(|SB |v324/)
+700 0 mpl,(|CL |v700^a/)
+967 0 mpl,(if v967.3='PMC' then if s(mpu,v967,mpl):'AVAILABLE' then if val(v2967[1]) < $DATAOFI2 then 'FT PMC'/ fi, else 'FT PMC'/ fi fi)
+866 0 mpl,if p(v866) then 'FT SCIELO'/ fi
+968 0 mpl,(if p(v968) and v968^a='doi' then 'FT INTERNET'/ fi)
+966 0 if l(['$IAHLINKS/iah2org']mpu,'PMID='v969)>0 then 'FT SCIELO'/ fi
+305 0 if v305:'Cochrane Database Syst Rev' and l(['/bases/lilG4/tabs/reviewsG4'],v353) > 0 then 'FT INTERNET'/ fi
+!
+
+TPR="iffatal"
+MSG="Erro: gentree OT"
+gentree $1ot mdlot $2
+. log
+
+rm  mdlot.fst
+rm  mdlot.lk1 mdlot.lk2
+rm  $1ot.*  
+
+echo
+echo "Fim: genmdlot"
+echo
+
+TPR="end"
+. log

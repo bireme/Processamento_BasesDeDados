@@ -1,0 +1,207 @@
+# ------------------------------------------------------------------------ #
+# GENMDLLI - Template para geracao dos invertidos LI's da MEDLINE.
+#            Este template engloba:
+#
+#            1) Geracao do arquivo invertido de check tags (mdlli) `a
+#               partir do master sem ABSTRACT (mdlbb), segundo a FST
+#               definida abaixo. 
+#      
+#            2) Geracao dos invertidos LI (tres idiomas) atraves da base 
+#               DECSCT - procedimento GENDECS9B.
+#
+#            OBS: O programa decs9b, contido no procedimento GENDECS9B, 
+#                 gera uma lista dos termos nao encontrados no DECSCT.
+#                 Esta lista tem o nome do invertido mdlli, gerado `a 
+#                 partir do master sem ABSTRACT com a extensao .LST.
+#
+# Marcelo - 23/12/93  update - 25/06/94 
+# Execucao - Processamento
+# sintaxe: "genmdlmh <dbn_mdlbb> <dbn_decsct> <tree_decsct> <loopcheck>"
+#    onde:
+#         <dbn_mdlbb> base de dados MEDLINE sem ABSTRACT (mdlbb).
+#         <dbn_decs> base de dados DECSCT.
+#         <tree_decs_field1> Invertido do DECSCT pelo campo 90.
+#         <loopcheck> intervalo para checks.
+#
+# ------------------------------------------------------------------------ #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlli"
+echo 
+
+if  [ "$#" -ne 4 ]
+then
+  TPR="fatal"
+  MSG="Use: genmdlli <dbn_mdlbb> <dbn_decsct> <tree_decsct> <loopcheck>"
+  . log
+fi
+
+############################# FSTs Generation ############################
+
+# Geracao da "proc" mdlli.prc - com todos checktags
+#echo "'D870D880', (if s(mpu,v880^h)='HUMANS' or s(mpu,v880^h)='YYYYYY' or s(mpu,v880^h)='XXXXXX' or s(mpu,v880^h)='ANIMALS' or s(mpu,v880^h)='CASE REPORT' or s(mpu,v880^h)='COMPARATIVE STUDY' or s(mpu,v880^h)='IN VITRO' or s(mpu,v880^h)='CHILD' or s(mpu,v880^h)='PREGNANCY' or s(mpu,v880^h)='EEEEEE' or s(mpu,v880^h)='INFANT' or s(mpu,v880^h)='ADULT' or s(mpu,v880^h)='ADOLESCENT' or s(mpu,v880^h)='DDDDDD' or s(mpu,v880^h)='WWWWWW' or s(mpu,v880^h)='ZZZZZZ' or s(mpu,v880^h)='CHILD' or s(mpu,v880^h)='CATS' or s(mpu,v880^h)='CATTLE' or s(mpu,v880^h)='CHICK EMBRYO' or s(mpu,v880^h)='DOGS' or s(mpu,v880^h)='GUINEA PIGS' or s(mpu,v880^h)='HAMSTERS' or s(mpu,v880^h)='MICE' or s(mpu,v880^h)='RABBITS' or s(mpu,v880^h)='RATS' then 'A880~'v880'~'fi)" > mdlli.prc
+echo "'D870D880', (if s(mpu,v880^h)='HUMANS' or s(mpu,v880^h)='YYYYYY' or s(mpu,v880^h)='XXXXXX' or s(mpu,v880^h)='ANIMALS' or s(mpu,v880^h)='CASE REPORT' or s(mpu,v880^h)='COMPARATIVE STUDY' or s(mpu,v880^h)='IN VITRO' or s(mpu,v880^h)='CHILD' or s(mpu,v880^h)='PREGNANCY' or s(mpu,v880^h)='EEEEEE' or s(mpu,v880^h)='INFANT' or s(mpu,v880^h)='ADULT' or s(mpu,v880^h)='YOUNG ADULT' or s(mpu,v880^h)='ADOLESCENT' or s(mpu,v880^h)='DDDDDD' or s(mpu,v880^h)='WWWWWW' or s(mpu,v880^h)='ZZZZZZ' or s(mpu,v880^h)='CHILD' or s(mpu,v880^h)='CATS' or s(mpu,v880^h)='CATTLE' or s(mpu,v880^h)='DOGS' or s(mpu,v880^h)='HAMSTERS' or s(mpu,v880^h)='MICE' or s(mpu,v880^h)='RABBITS' or s(mpu,v880^h)='RATS' then 'A880~'v880'~'fi)" > mdlli.prc
+# mdlli.fst 
+
+echo '370 0 mpl,"CT AA YES"D370,"CT AA NO"N370' > mdlli.fst
+echo "306 0 mpl,(|LA |v306/)" >> mdlli.fst
+echo "999 0 mpl,if v668='PubMed-not-MEDLINE' then |PU |v668/ fi" >> mdlli.fst
+#echo "668 0 mpl,if p(v668) then |PU |v668/ fi" >> mdlli.fst
+echo "329 0 mpl,(|LI |v329/)" >> mdlli.fst
+echo "324 0 mpl,(|SB |v324/)" >> mdlli.fst
+echo "307 0 mpl,(|PD |v307/)" >> mdlli.fst
+echo "360 0 mpl,(|PT |v360/)" >> mdlli.fst
+#echo "999 0 mpl,if a(v870) then 'ME MEDLINEEXPRESS'/ fi" >> mdlli.fst
+#Mudaram de CT para PT
+#echo "360 0 mpu, if s(mpu,v360) : 'BBBBBB' then \`PT RESEARCH SUPPORT, NON-U.S. GOV'T\`/ fi">>mdlli.fst
+#echo "360 0 mpu, if s(mpu,v360) : 'CCCCCC' then \`PT RESEARCH SUPPORT, U.S. GOV'T, NON-P.H.S.\`/ fi">>mdlli.fst
+#echo "360 0 mpu, if s(mpu,v360) : 'AAAAAA' then \`PT RESEARCH SUPPORT, U.S. GOV'T, P.H.S.\`/ fi">>mdlli.fst
+echo "880 0 mpl,'CT ALL CITATIONS'" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'PREGNANCY' then 'CT PREGNANCY'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'CASE REPORT' then 'CT CASE REPORTS'/ fi " >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'COMPARATIVE STUDY' then 'CT COMPARATIVE STUDY'/ fi " >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'IN VITRO' then 'CT IN VITRO'/ fi" >> mdlli.fst
+# DesTroquei o ' por ´ para geração das 3 chaves seguintes (12/07/2006)
+#echo "880 0 mpu, if s(mpu,v880^h) : 'BBBBBB' then \`CT RESEARCH SUPPORT, NON-U.S. GOV´T\`/ fi">>mdlli.fst
+#echo "880 0 mpu, if s(mpu,v880^h) : 'CCCCCC' then \`CT RESEARCH SUPPORT, U.S. GOV´T, NON-P.H.S.\`/ fi">>mdlli.fst
+#echo "880 0 mpu, if s(mpu,v880^h) : 'AAAAAA' then \`CT RESEARCH SUPPORT, U.S. GOV´T, P.H.S.\`/ fi">>mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'XXXXXX' then 'CT FEMALE'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) = 'YYYYYY'  then 'CT MALE'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'HUMANS' then 'CT HUMANS'/ fi) " >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX'  then 'CT HUMANS FEMALE'/ fi " >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and s(mpu,v880^h) : 'ZZZZZZ' then 'CT HUMANS FEMALE INFANT, NEWBORN'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and (s(mpu,v880^h) : 'INFANT' and (not s(mpu,v880^h) : 'NEWBORN')) then 'CT HUMANS FEMALE INFANT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and s(mpu,v880^h) : 'WWWWWW' then 'CT HUMANS FEMALE CHILD, PRESCHOOL'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and (s(mpu,v880^h) : 'CHILD' and (not s(mpu,v880^h) : 'PRESCHOOL')) then 'CT HUMANS FEMALE CHILD'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and s(mpu,v880^h) : 'ADOLESCENT' then 'CT HUMANS FEMALE ADOLESCENT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and s(mpu,v880^h) : 'ADULT' then 'CT HUMANS FEMALE ADULT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and s(mpu,v880^h) : 'DDDDDD' then 'CT HUMANS FEMALE MIDDLE AGE'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'XXXXXX' and s(mpu,v880^h) : 'EEEEEE' then 'CT HUMANS FEMALE AGED'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  then 'CT HUMANS MALE'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'ZZZZZZ' then 'CT HUMANS MALE INFANT, NEWBORN'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'INFANT' then 'CT HUMANS MALE INFANT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'WWWWWW' then 'CT HUMANS MALE CHILD, PRESCHOOL'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'CHILD' then 'CT HUMANS MALE CHILD'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'ADOLESCENT' then 'CT HUMANS MALE ADOLESCENT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'ADULT' then 'CT HUMANS MALE ADULT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'YOUNG' and s(mpu,v880^h) : 'ADULT' then 'CT YOUNG ADULT'/ fi" >> mdlli.fst
+#echo "880 0 if s(mpu,v880^h) : 'YOUNG' then 'CT YOUNG ADULT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'DDDDDD' then 'CT HUMANS MALE MIDDLE AGE'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'YYYYYY'  and s(mpu,v880^h) : 'EEEEEE' then 'CT HUMANS MALE AGED'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'ZZZZZZ' then 'CT HUMANS INFANT, NEWBORN'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'INFANT' then 'CT HUMANS INFANT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'WWWWWW' then 'CT HUMANS CHILD, PRESCHOOL'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'CHILD' then 'CT HUMANS CHILD'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'ADOLESCENT' then 'CT HUMANS ADOLESCENT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'ADULT' then 'CT HUMANS ADULT'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'DDDDDD' then 'CT HUMANS MIDDLE AGE'/ fi" >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'HUMANS' and s(mpu,v880^h) : 'EEEEEE' then 'CT HUMANS AGED'/ fi" >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'ANIMAL' then 'CT ANIMALS'/ fi) " >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'ANIMAL' and s(mpu,v880^h) : 'XXXXXX'  then 'CT ANIMALS FEMALE'/ fi " >> mdlli.fst
+echo "880 0 if s(mpu,v880^h) : 'ANIMAL' and s(mpu,v880^h) : 'YYYYYY'  then 'CT ANIMALS MALE'/ fi" >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'CATS' then 'CT CATS'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'CATTLE' then 'CT CATTLE'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'CHICK EMBRYO' then 'CT CHICK EMBRYO'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'DOGS' then 'CT DOGS'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'GUINEA PIGS' then 'CT GUINEA PIGS'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'HAMSTERS' then 'CT HAMSTERS'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'MICE' then 'CT MICE'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'RABBITS' then 'CT RABBITS'/ fi) " >> mdlli.fst
+echo "880 0 (if s(mpu,v880^h) : 'RATS' then 'CT RATS'/ fi) " >> mdlli.fst
+echo "880 0 if p(v969) then 'CT /All Records' fi" >> mdlli.fst
+
+#
+# Inverted File Generation
+#
+
+# LI 
+
+# ------------------------------------------------------------------- #
+# Extracao das chaves - Geracao dos arquivos LN's
+# ------------------------------------------------------------------- #
+
+echo "Female|XXXXXX" > mdltroca.seq
+echo "Male|YYYYYY" >> mdltroca.seq
+echo "Child, Preschool|WWWWWW" >> mdltroca.seq
+echo "Infant, Newborn|ZZZZZZ" >> mdltroca.seq
+# mudaram de CT para PT
+#echo "Research Support, U.S. Gov't, P.H.S.|AAAAAA" >> mdltroca.seq
+#echo "Research Support, Non-U.S. Gov't|BBBBBB" >> mdltroca.seq
+#echo "Research Support, U.S. Gov't, Non-P.H.S.|CCCCCC" >> mdltroca.seq
+echo "Middle Aged|DDDDDD" >> mdltroca.seq
+echo "Aged|EEEEEE" >> mdltroca.seq
+
+
+TPR="iffatal"
+MSG="Erro na geracao do Master gizmo mdltroca"
+mx seq=mdltroca.seq create=mdltroca -all now
+. log
+
+TPR="iffatal"
+MSG="elimina ocorrencias acima de 30 do campo v880"
+mx $1 "proc=if nocc(v880)>50 then 'd880' fi" create=$1"tmp" -all now tell=100000
+. log
+mv $1"tmp".mst $1.mst
+mv $1"tmp".xrf $1.xrf
+
+TPR="iffatal"
+MSG="Erro na extracao de chaves LN's"
+mx $1 gizmo=mdltroca "proc=if nocc(v880)>30 then 'd880' fi" "proc=@mdlli.prc" "fst=@mdlli.fst" ln1=mdlli.ln1 ln2=mdlli.ln2 +fix/m -all now tell=10000
+. log
+
+rm mdlli.prc
+rm mdltroca*
+
+# ------------------------------------------------------------------- #
+# Classificacao das chaves - Geracao dos arquivos LK's
+# ------------------------------------------------------------------- #
+MSG="Erro na classificacao das chaves LK1"
+genlk -s mdlli.lk1 mdlli.ln1
+. log
+
+MSG="Erro na classificacao das chaves LK2"
+genlk -s mdlli.lk2 mdlli.ln2
+. log
+
+# ------------------------------------------------------------------- #
+# Carga da arvore de invertido 
+# ------------------------------------------------------------------- #
+MSG="Erro na carga da arvore de invertido"
+geninv $1 mdlli mdlli
+. log
+
+#rm mdlli.fst
+#rm mdlli.ln*
+#rm mdlli.lk*
+
+# ------------------------------------------------------------------------ #
+# geracao dos LI's
+# ------------------------------------------------------------------------ #
+
+TPR="iffatal"
+MSG="Error: gendecs9b"
+gendecs9b mdlli ../tabs/$2 mdlli ../tabs/$3
+. log 
+
+#rm mdllic.*
+#rm mdllii.lk1 mdllii.lk2 mdllie.lk1 mdllie.lk2 mdllip.lk1 mdllip.lk2 mdllic.lk1 mdllic.lk2
+#rm mdlli.ly1 mdlli.ly2 mdlli.n01 mdlli.n02 mdlli.cnt mdlli.fst
+#rm mdllii.lst rm mdllie.lst mdllip.lst mdllic.lst
+#rm mdlli.iyp
+
+#cd pc
+#mv mdllii.iyp mdlli.iyp
+#rm mdllie.iyp
+#rm mdllip.iyp
+#rm mdllic.iyp
+#rm mdllic.*
+
+echo 
+echo "Fim: genmdlli"
+echo
+
+TPR="end"
+. log

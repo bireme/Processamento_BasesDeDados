@@ -1,0 +1,469 @@
+# -------------------------------------------------------------------------- #
+# GENMDLTW - TEMPLATE para geracao do invertido TW.
+#            Descricao:
+#
+#            1) Geracao do invertido AB (ABSTRACT).
+#            2) Geracao dos MH's (3 idiomas + categorias).
+#            3) Extracao W/W do invertido MHI (ingles).
+#            4) Extracao dos LK's AB `a partir do invertido AB.
+#            5) Extracao dos LK's RN.
+#            6) Extracao dos LK's PS.
+#            7) Extracao dos LK's TI.
+#            8) Merge dos LK's AB, MH, TI, RN e PS.
+#            9) Carga do invertido TW.
+#
+#
+# Marcelo - 21/03/94
+# Execucao - Processamento
+# sintaxe: "genmdltw <dbn_decs> <tree_decs_field1> <tree_decs_field701>
+#           <loopcheck> <DP>" 
+#    onde:
+#           <dbn_decs> base de dados decs.
+#           <tree_decs_field1> invertido do DECS pelo campo 1.
+#           <tree_decs_field701> invertido do DECS pelo campo 701.
+#           <loopcheck> intervalo para checks.
+#           <DP> data de publicacao.
+#
+# -------------------------------------------------------------------------- #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio genmdltw"
+echo
+
+if 
+  [ "$#" -ne 5 ]
+then
+  TPR="fatal"
+  MSG="Use: genmdltw <dbn_decs> <tree_decs_field1> <tree_decs_field701> <loopcheck> <DP>"
+  . log
+fi
+
+# ------------------------------------------------------------------------- #
+# Geracao dos LK's ABSTRACT (AB)
+# ------------------------------------------------------------------------- #
+
+echo
+echo "Processing AB..."
+echo
+echo "   genlkab" >> mdl$5.tim
+TPR="iffatal"
+MSG="Erro genmdlinv: AB"
+../tpl.mdl/genlkab mdlab$5 $4 2> mdl$5.tmp
+. log
+echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+
+# ------------------------------------------------------------------------- #
+# MH
+# ------------------------------------------------------------------------- #
+
+echo
+echo "Processing MH..."
+echo
+echo "   genmdlmh" >> mdl$5.tim
+TPR="iffatal"
+MSG="Erro genmdlinv: MH"
+../tpl.mdl/genmdlmh mdlbb$5 $1 $2 $3 2> mdl$5.tmp
+. log
+echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+# ------------------------------------------------------------------------- #
+# Geracao dos LK's TI  
+# ------------------------------------------------------------------------- #
+#352 4 mpl,(v352|%|/,v130|%|/,v380|%|/)
+cat>mdlti.fst<<!
+352 4 mpl,(v352|%|/,v380|%|/)
+!
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do TI1"
+mx mdlbb$5 "fst=@mdlti.fst" ln1=mdlti1.ln1 ln2=mdlti1.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do TI1" 
+genlk -s mdlti1.lk1 mdlti1.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do TI1"
+genlk -s mdlti1.lk2 mdlti1.ln2
+. log
+
+# incluido 09/06/2010
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do TI3"
+mx mdlbb$5 "fst=@mdlti.fst" actab=$TABS/ac850XT.tab gizmo=../tabs/galfabeto ln1=mdlti3.ln1 ln2=mdlti3.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do TI3"
+genlk -s mdlti3.lk1 mdlti3.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do TI3"
+genlk -s mdlti3.lk2 mdlti3.ln2
+. log
+
+# merge do Ti1 + Ti3
+TPR="iffatal"
+MSG="Erro no merge mdlti.lk1 mdlti1.lk1 mdlti3.lk1" 
+genlk -m mdlti.lk1 mdlti1.lk1 mdlti3.lk1
+. log
+
+TPR="iffatal"
+MSG="Erro no merge mdlti.lk2 mdlti1.lk2 mdlti3.lk2"
+genlk -m mdlti.lk2 mdlti1.lk2 mdlti3.lk2
+. log
+
+rm mdlti.fst
+rm mdlti1.ln1 mdlti1.ln2 mdlti1.lk1 mdlti1.lk2
+rm mdlti3.ln1 mdlti3.ln2 mdlti3.lk1 mdlti3.lk2
+
+# -------------------------------------------------------------------- #
+# Geracao dos LK's TA e PMID
+# -------------------------------------------------------------------- #
+cat>mdltaw.fst<<!
+307 4 mpl,(v307|%|/)
+308 4 mpl,(v308|%|/)
+309 4 mpl,(v309|%|/)
+969 0 mpl,(v969/)
+85 4 mpl,(v85|%|/)
+!
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do AU"
+mx mdlbb$5 "fst=@mdltaw.fst" ln1=mdltaw.ln1 ln2=mdltaw.ln2 +fix/m -all now tell=1000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do AU"
+genlk -s mdltaw.lk1 mdltaw.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do AU"
+genlk -s mdltaw.lk2 mdltaw.ln2
+. log
+
+rm  mdltaw.fst
+rm  mdltaw.ln1 mdltaw.ln2
+
+# -------------------------------------------------------------------- #
+# Geracao dos LK's RN (CAS/Nome de substancia)
+# -------------------------------------------------------------------- #
+cat>mdlrn.fst<<!
+261 4 mpl,(v261^a/)
+261 4 mpl,(v261^b/)
+!
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do TI1"
+mx mdlbb$5 "fst=@mdlrn.fst" ln1=mdlrn1.ln1 ln2=mdlrn1.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do TI1"
+genlk -s mdlrn1.lk1 mdlrn1.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do TI1"
+genlk -s mdlrn1.lk2 mdlrn1.ln2
+. log
+
+# incluido 09/06/2010
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do TI3"
+mx mdlbb$5 "fst=@mdlrn.fst" actab=$TABS/ac850XT.tab gizmo=../tabs/galfabeto ln1=mdlrn3.ln1 ln2=mdlrn3.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do TI3"
+genlk -s mdlrn3.lk1 mdlrn3.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do TI3"
+genlk -s mdlrn3.lk2 mdlrn3.ln2
+. log
+
+# merge do RN1 + RN3
+TPR="iffatal"
+MSG="Erro no merge mdlrn.lk1 mdlrn1.lk1 mdlrn3.lk1"
+genlk -m mdlrn.lk1 mdlrn1.lk1 mdlrn3.lk1
+. log
+
+TPR="iffatal"
+MSG="Erro no merge mdlrn.lk2 mdlrn1.lk2 mdlrn3.lk2"
+genlk -m mdlrn.lk2 mdlrn1.lk2 mdlrn3.lk2
+. log
+
+rm mdlrn.fst
+rm mdlrn1.ln1 mdlrn1.ln2 mdlrn1.lk1 mdlrn1.lk2
+rm mdlrn3.ln1 mdlrn3.ln2 mdlrn3.lk1 mdlrn3.lk2
+
+# -------------------------------------------------------------------- #
+# Geracao dos LK's PS
+# -------------------------------------------------------------------- #
+cat>mdlps.fst<<!
+379 4 mpl,(v379/)
+!
+
+echo "extracting keys ..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do PS"
+mx mdlbb$5 "fst=@mdlps.fst" ln1=mdlps.ln1 ln2=mdlps.ln2 +fix/m -all now tell=1000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do PS"
+genlk -s mdlps.lk1 mdlps.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do PS"
+genlk -s mdlps.lk2 mdlps.ln2
+. log
+
+rm  mdlps.fst
+rm  mdlps.ln1 mdlps.ln2
+
+
+# -------------------------------------------------------------------- #
+# Geracao dos LK's NPEMH
+# -------------------------------------------------------------------- #
+cat>mdlnpemh.fst<<!
+23 4 (v23^i/),(v23^e/),(v23^p/)
+!
+
+echo "extracting keys NPEMH-1-2..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do NPEMH"
+mx mdlbb$5 "join=../tabs/decs,23=(mpu,v870^h/)(v880^h/,mpl)" "proc='d32001'" "fst=@mdlnpemh.fst" ln1=mdlnpemh1.ln1 ln2=mdlnpemh2.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do NPEMH1"
+genlk -s mdlnpemh1.lk1 mdlnpemh1.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do NPEMH2"
+genlk -s mdlnpemh2.lk2 mdlnpemh2.ln2
+. log
+
+# --------------------------------------------------------------
+
+echo "extracting keys NPEMH-3-4..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do NPEMH-3-4"
+mx mdlbb$5 "join=../tabs/decs,23=(mpu,v870^h/)(v880^h/,mpl)" actab=$TABS/ac850XT.tab "proc='d32001'" "fst=@mdlnpemh.fst" ln1=mdlnpemh3.ln1 ln2=mdlnpemh4.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do NPEMH3"
+genlk -s mdlnpemh3.lk1 mdlnpemh3.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do NPEMH4"
+genlk -s mdlnpemh4.lk2 mdlnpemh4.ln2
+. log
+
+rm  mdlnpemh1.ln1 mdlnpemh2.ln2
+rm  mdlnpemh3.ln1 mdlnpemh4.ln2
+
+
+# merge do NPEMH
+TPR="iffatal"
+MSG="Erro no merge mdlnpemh.lk1"
+genlk -m mdlnpemh.lk1 mdlnpemh1.lk1 mdlnpemh3.lk1
+. log
+
+TPR="iffatal"
+MSG="Erro no merge mdlnpemh.lk2"
+genlk -m mdlnpemh.lk2 mdlnpemh2.lk2 mdlnpemh4.lk2
+. log
+
+rm  mdlnpemh.fst
+rm mdlnpemh1.lk1 mdlnpemh3.lk1 mdlnpemh2.lk2 mdlnpemh4.lk2
+
+#-----------------------------------------------------------------------#
+# Gera MH/WW para TWux
+#-----------------------------------------------------------------------#
+#-----------------------------------------------------------------------#
+
+echo "   genmdllnwwi" >> mdl$5.tim
+
+cat > mdlmh.fst <<!
+1 4 mpl,v1/
+!
+
+for i in i e p
+do
+
+  echo
+  echo "Processing MH$i/WW..."
+  echo
+  # Nova extracao deixa de usar actab default e usa ac437n_barra (plus numeros e /) 22/11/2004
+  TPR="iffatal"
+  MSG="Erro na extracao de chaves - mdlmh1$i"
+  mz mdlmh$i "fst=@mdlmh.fst" ln1=mdlmhw1$i.ln1 ln2=mdlmhw1$i.ln2 gizmo=../tabs/gizqlfw +fix/m -all now tell=100000 2> mdl$5.tmp
+  . log
+  # Nova extracao deixa de usar actab default e usa ac437n_barra (plus numeros e /) 22/11/2004
+  TPR="iffatal"
+  MSG="Erro na extracao de chaves - mdlmh2$i"
+  mz mdlmh$i "fst=@mdlmh.fst" actab=$TABS/ac850XT.tab ln1=mdlmhw2$i.ln1 ln2=mdlmhw2$i.ln2 gizmo=../tabs/gizqlfw +fix/m -all now tell=100000 2> mdl$5.tmp
+  . log
+
+
+  for j in 1 2
+  do
+
+      for k in 1 2
+      do
+          echo "   genmdllk$jwwi" >> mdl$5.tim
+          TPR="iffatal"
+          MSG="Erro no genlk - mdlmhw$i"
+          genlk -s mdlmhw$k$i.lk$j mdlmhw$k$i.ln$j 2> mdl$5.tmp
+          . log
+          echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+      done
+      rm mdlmhw1$i.ln$j
+      rm mdlmhw2$i.ln$j
+
+  done
+
+
+  for  m in 1 2
+  do
+      echo "   genmdllk$jwwi" >> mdl$5.tim
+      TPR="iffatal"
+      MSG="Erro no genlk - mdlmhw$i"
+      genlk -m mdlmhw$i.lk$m mdlmhw1$i.lk$m mdlmhw2$i.lk$m 2> mdl$5.tmp
+      . log
+      echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+  done
+
+rm mdlmhw?$i.lk?
+      
+done  
+
+#-----------------------------------------------------------------------#
+# MERGE DOS LKs para TWux
+#-----------------------------------------------------------------------#
+
+#echo
+#echo "Merge MDLTWUX.LK1..."
+#echo
+#echo "   genmdlmerlk1" >> mdl$5.tim
+#TPR="iffatal"
+#MSG="Erro no merge dos arquivos WW (e-p/LK1) e TW"
+#genlk -m mdltwux.lk1 mdlmhwi.lk1 mdlmhwe.lk1 mdlmhwp.lk1 mdlab.lk1 mdlti.lk1 mdlrn.lk1 mdlnpemh.lk1 2> mdl$5.tmp
+#. log
+#rm mdlmhwi.lk1 mdlmhwe.lk1 mdlmhwp.lk1 mdltw.lk1
+#echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+
+#echo
+#echo "Merge MDLTWUX.LK2..."
+#echo
+#echo "   genmdlmerlk2" >> mdl$5.tim
+#TPR="iffatal"
+#MSG="Erro no merge dos arquivos AB, TI, WW (LK1) e RN"
+#genlk -m mdltwux.lk2 mdlmhwi.lk2 mdlmhwe.lk2 mdlmhwp.lk2 mdlab.lk2 mdlti.lk2 mdlrn.lk2 mdlnpemh.lk2 2> mdl$5.tmp
+#. log
+#rm mdlmhwi.lk2 mdlmhwe.lk2 mdlmhwp.lk2 mdltw.lk2
+#echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+#-----------------------------------------------------------------------#
+# CARGA DO INVERTIDO TWUX para ONLINE 
+#-----------------------------------------------------------------------#
+
+#echo
+#echo "Carga MDLTWUX..."
+#echo
+#echo "   genmdlloadtw" >> mdl$5.tim
+#TPR="iffatal"
+#MSG="Erro na carga do invertido TW"
+#geninv mdlbb$5 mdltwux mdltwux 2> mdl$5.tmp 
+#. log
+#rm  mdltwux.lk1 mdltwux.lk2
+#echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+#-----------------------------------------------------------------------#
+# MERGE DOS LKs para TW
+#-----------------------------------------------------------------------#
+
+
+   echo
+   echo "Merge MDLTW.LK1..."
+   echo
+   echo "   genmdlmerlk1" >> mdl$5.tim
+   TPR="iffatal"
+   MSG="Erro no merge dos arquivos i-e-p/LK1 para TWux$i"
+   genlk -m mdltw.lk1 mdlmhwi.lk1 mdlmhwe.lk1 mdlmhwp.lk1 mdlab.lk1 mdltaw.lk1 mdlti.lk1 mdlrn.lk1 mdlnpemh.lk1 mdlnpemh.lk1
+   . log
+   rm mdlmhw$i.lk1
+   echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+   echo
+   echo "Merge MDLTW.LK2..."
+   echo
+   echo "   genmdlmerlk2" >> mdl$5.tim
+   TPR="iffatal"
+   MSG="Erro no merge dos arquivos i-e-p/LK2 para TWux$i"
+   genlk -m mdltw.lk2 mdlmhwi.lk2 mdlmhwe.lk2 mdlmhwp.lk2 mdlab.lk2 mdltaw.lk2 mdlti.lk2 mdlrn.lk2 mdlnpemh.lk2 mdlnpemh.lk2
+   . log
+   rm mdlmhw$i.lk2
+   echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+echo
+echo "Carga MDLTW..."
+echo
+echo "   genmdltw" >> mdl$5.tim
+TPR="iffatal"
+MSG="Erro na carga do invertido TW"
+geninv mdlbb$5 mdltw mdltw 2> mdl$5.tmp 
+. log
+rm  mdltw.lk1 mdltw.lk2
+echo "   `grep real mdl$5.tmp`" >> mdl$5.tim
+
+
+  # Crunch do invertido MDLTWP para o MENUPRI
+  # ----------------------------------------------------------------- #
+  # Crunch da arvore de invertido
+  # ----------------------------------------------------------------- #
+  # comentado em 18/04/2011
+  #TPR="iffatal"
+  #MSG="Erro no crunch da arvore de invertido"
+  #crunch mdltw ifp
+  #. log
+
+  # ----------------------------------------------------------------- #
+  # Geracao do arquivo IY0
+  # ----------------------------------------------------------------- #
+  # comentado em 18/04/2011
+  #TPR="iffatal"
+  #MSG="Erro na geracao do arquivo IY0"
+  #geniy0 pc/mdltw
+  #. log
+
+rm mdlab.lk? mdlti.lk? mdltaw.lk? mdlrn.lk? mdlnpemh.lk? mdlps.lk?
+rm mdlmhw?.lk? 
+
+TPR="end"
+. log

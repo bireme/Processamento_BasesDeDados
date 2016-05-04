@@ -1,0 +1,127 @@
+# --------------------------------------------------------------------------- #
+# CHKLOG -  Procedimento para check dos arquivos .LST gerados no processamento
+#           de um determinado ano. 
+#           Caso seja encontrado algum erro, sera' criado um arquivo
+#           "mdlDP.err"
+#           no diretorio corrente.
+#           Este procedimento de ser executado no diretorio onde se encontram
+#           os seguintes arquivos:
+#
+#           Kwicta.lst, mdlli.lst, mdlmh9a.lst, mdlmh9b.lst, gencateg.lst
+#           
+# marcelo - 24/08/94
+# execucao - diretorio LOG do processamento
+# sintaxe: "chklog <DP>"
+# onde:
+#       <DP> data de publicacao
+#
+# -------------------------------------------------------------------------- #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: chklog"
+echo
+
+if [ "$#" -ne 1 ]
+then
+  TPR="fatal"
+  MSG="use: chklog <DP>"
+  . log
+fi
+
+echo
+echo "checking..."
+echo
+
+if  [ -f mdl$1.chk ]
+then
+    mv mdl$1.chk mdl$1old.chk
+fi
+
+echo "###########################  CHECK FILE - mdl$1  ############################" > mdl$1.chk
+echo >> mdl$1.chk
+
+if  [ -f mdl$1.err ]
+then
+    echo "P R O C E S S I N G  E R R O R S" >> mdl$1.chk
+    grep "1" mdl$1.err > /dev/null
+    if  [ "$?" -eq 0 ]
+    then
+        grep "1" mdl$1.err|cut -f1 -d"=" >> mdl$1.chk 
+    else
+	echo "No Errors" >> mdl$1.chk
+    fi
+else
+    echo "Error file (mdl$1.err)  N O T  F O U N D." >> mdl$1.chk
+    echo >> mdl$1.chk
+fi
+
+echo >> mdl$1.chk
+echo >> mdl$1.chk
+echo "T E R M S  N O T  F O U N D">> mdl$1.chk
+
+# Verifica existencia dos arquivos .LST
+
+FILECHK=""
+#for i in kwictamdl mdlli9b mdlmh9a mdlmh9b gencateg
+for i in mdlli9b mdlmh9a mdlmh9b
+do
+    if
+      [ ! -f $i.lst ]
+    then
+       echo >> mdl$1.chk
+       echo "Warning: $i.lst not found" >> mdl$1.chk
+       echo "Warning: $i.lst not found"
+       echo >> mdl$1.chk
+    else
+       FILECHK=$FILECHK" $i"
+    fi
+done
+
+
+# -------------------------------------------------------------------------- #
+# Check dos .LST mdl
+# -------------------------------------------------------------------------- #
+
+for i in $FILECHK
+do
+    grep -i "not found" $i.lst > mdlchklog
+    VAL=$?
+    if  [ $VAL -eq 2 ]
+    then 
+	echo "Error: greg $i.lst"
+	echo >> mdl$1.chk
+	echo "C H E C K  N O T  S U C E S S F U L L" >> mdl$1.chk
+	exit 1
+    fi
+    if  [ $VAL -eq 0 ]
+    then
+	echo "################" >> mdl$1.chk
+	echo "$i.lst" >> mdl$1.chk
+	echo "################" >> mdl$1.chk
+	echo >> mdl$1.chk
+	cat mdlchklog >> mdl$1.chk
+	echo >> mdl$1.chk
+    else
+	echo "################" >> mdl$1.chk
+	echo "$i.lst" >> mdl$1.chk
+	echo "################" >> mdl$1.chk
+	echo >> mdl$1.chk
+	echo "No Terms not found" >> mdl$1.chk
+	echo >> mdl$1.chk
+    fi
+done
+
+rm mdlchklog
+
+echo >> mdl$1.chk
+echo "#########################  END CHECK FILE - mdl$1  ##########################" >> mdl$1.chk
+
+echo
+echo "Fim: chklog"
+echo
+
+TPR="end"
+. log

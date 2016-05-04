@@ -1,0 +1,48 @@
+#------------------------------------------------------------------------#
+# GENMDLAU - Procedimento para geracao do invertido de AUtor. 
+#
+# Marcelo - 01/03/94 
+# Excecucao - Processamento
+# Sintaxe: genmdlau <dbn_mdlbb> <loopcheck>
+#    onde:
+#          <dbn_mdlbb> base de dados MEDLINE sem ABSTRACT (mdlbb).
+#          <loopcheckp> intervalo para checks.
+#
+#-----------------------------------------------------------------------#
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlau"
+echo
+
+if [ "$#" -ne 2 ]
+then 
+   TPR="fatal"
+   MSG="use: genmdlau <dbn_mdlbb> <loopcheck>"
+   . log 
+fi
+
+# -------------------------------------------------------------------- #
+# WRKAU.FST 
+# -------------------------------------------------------------------- #
+#372 0 mpu,(v372|%|/)
+cat>mdlau.fst<<!
+372 0 mpl,(if (v372^*.1>='A' and v372^*.1<='Z') or (v372^*.1>='a' and v372^*.1<='z')  then v372^*|%|/ else if v372^*.1=' ' then v372^**1|%|/ fi fi)
+!
+
+TPR="iffatal"
+MSG="Erro: gentree AU"
+gentree $1 mdlau $2
+. log
+
+rm  mdlau.fst
+rm  mdlau.lk1 mdlau.lk2
+
+echo
+echo "Inicio: genmdlau"
+echo
+
+TPR="end"
+. log

@@ -1,0 +1,70 @@
+PROCESSAMENTO PARA CONVERSAO DO XML DA NLM PARA BASE CISIS
+==========================================================
+
+Processamento:
+
+	Estando no diretorio "bases", aplicar o comando abaixo:
+	nohup ../tpl.mdl/GenBasesCISIS.sh [update/baseline] &> ../outs/[update|baseline]_proc.AAAAMMDD.out &
+
+	Observacao 0: java version "1.6.0_10"
+
+
+	Observacao 1: A estrutura de diretorios esperada eh:
+	             /bases/mdlG4
+	                     |
+	                     +--- bases
+	                     +--- outs
+	                     +--- tabs
+	                     +--- tpl.mdl
+	                     +--- fasea
+                                      +--- update_xml
+                                      +--- update_isis
+                                      +--- baseline_xml
+                                      +--- baseline_isis
+                             
+
+	Observacao 2: Devera existir pelo menos 1 arquivo XML no diretorio "fasea"
+
+
+	Objetivo(s): Criar bases CISIS com elementos de XML da NLM para processamento MEDLINE
+
+
+	Dependencias ( arquivos necessarios para processamento ):
+	 ==> tpl.mdl/GenBasesCISIS.sh
+	    - bases/decs.mst-xrf-fst
+	    - bases/gqlfi.mst-xrf
+	    - bases/XMLs.lst
+	    ==> tpl.mdl/ConvXML2ISIS.sh
+	       ==> tpl.mdl/Xml2Isis.sh
+	              - xmls (diretorio) 
+	              - tabs/mdl.tab
+	       ==> tpl.xml2isis/Medline.sh
+	
+	       - tabs/ixmlmdl.prc
+	       - $TABS/gutf8ansFFIG4
+	       - $TABS/gansnaFFIG4"
+	       - $TABS/ghtmlansFFIG4
+	       - gqlfi
+	       - tabs/decs.prc
+	       - tabs/bxmlmdl.prc
+	       - tabs/DeleteCitation.tab
+	       - id.fst
+
+	Resultado: masteres de Inversao e Browser, arquivos invertidos 
+
+
+        Execucao: 
+        Baixar XMLs
+        ============
+        G4 serverofi3:/bases/mdlG4/fasea
+        nohup ../tpl.mdl/traz_mdl_update_files.sh [ano 2 caracteres] &> ../outs/proc_get_update.YYYYMMDD.out &
+
+        Realizar processo de conversão
+        ==============================
+        G4 serverofi3:/bases/mdlG4/bases
+        nohup ../tpl.mdl/GenBasesCISIS.sh [update|baseline] &> ../outs/[update|baseline]_proc.20111129.out &
+
+
+
+
+Fabio Brito - 20101105

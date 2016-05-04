@@ -1,0 +1,75 @@
+# ------------------------------------------------------------------------ #
+# GENMDLMH - Template para geracao dos invertidos MH (ingles, espanhol,
+#            portugues) da MEDLINE.
+#            Este template engloba:
+#
+#            1) Geracao do invertido autorizado (mdlmh) a partir das bases
+#               MEDLINE e DECS - procedimento GENDECS9A. 
+#      
+#            2) Traducao dos termos do invertido autorizado (mdlmh) 
+#               que foram encontrados no DECS - procedimento GENDECS9BMH.
+#
+#            OBS: O programa decs9b, contido no procedimento GENDECS9B, 
+#                 gera uma lista dos termos nao encontrados no DECS.
+#                 Esta lista tem o nome com uma extensao .LST.
+#
+#
+# Marcelo - 17/03/94  update - 25/11/97
+# Execucao - Processamento
+# sintaxe: "genmdlmh <dbn_mdlbb> <dbn_decs> <tree_decs_field1>
+#                    <tree_decs_field701>"
+#    onde:
+#         <dbn_mdlbb> base de dados MEDLINE.
+#         <dbn_decs> base de dados DECS.
+#         <tree_decs_field1> Invertido do DECS pelo campo 1.
+#         <tree_decs_field701> Invertido do DECS pelo campo 701.
+#
+# ------------------------------------------------------------------------ #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlmh"
+echo
+
+if 
+  [ "$#" -ne 4 ]
+then
+  TPR="fatal"
+  MSG="Use: genmdlmh <dbn_mdlbb> <dbn_decs> <tree_decs_field1> <tree_decs_field701>"
+ . log
+fi
+
+# ----------------------------------------------------------------------- #
+# Execucao gendecs9a
+# ----------------------------------------------------------------------- #
+
+TPR="iffatal"
+MSG="Error: gendecs9a"
+gendecs9a $1 $3 mdlmh
+. log
+
+# ----------------------------------------------------------------------- #
+# Execucao gendecs9b
+# ----------------------------------------------------------------------- #
+
+TPR="iffatal"
+MSG="Error: gendecs9b"
+../tpl.mdl/gendecs9bmh mdlmh $2 mdlmh $4
+. log
+rm mdlmh.fst
+rm mdlmhe.lst mdlmhp.lst mdlmhc.lst
+# novos deletes
+#rm mdlmhc.iyp mdlmhe.iyp mdlmhp.iyp
+cd pc
+mv mdlmhi.iyp mdlmh.iyp
+rm mdlmhc.iyp mdlmhe.iyp mdlmhp.iyp
+cd ..
+
+echo
+echo "Fim genmdlmh"
+echo
+
+TPR="end"
+. log

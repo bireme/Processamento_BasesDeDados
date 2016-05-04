@@ -1,0 +1,48 @@
+#----------------------------------------------------------------------#
+# GENMDLOT - Procedimento para geracao do invertido OThers.
+#
+# Marcelo - 01/03/94 
+# Execucao - Processamento
+# Sintaxe: genmdlss <dbn_mdlbb> <loopcheck>
+#    onde:
+#          <dbn_mdlbb> base de dados MEDLINE sem ABSTRACT (mdlbb).
+#          <loopcheck> intervalo para checks
+#
+#----------------------------------------------------------------------#
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlss"
+echo
+
+if [ "$#" -ne 2 ]
+then 
+   TPR="fatal"
+   MSG="use: genmdlss <dbn_mdlbb> <loopcheck>"
+   . log 
+fi
+
+# -------------------------------------------------------------------- #
+# WRKOT.FST 
+# -------------------------------------------------------------------- #
+
+cat>mdlss.fst<<!
+668 0 mpl,(|ST |v668/)
+324 0 mpl,(|SB |v324/)
+!
+TPR="iffatal"
+MSG="Erro: gentree OT"
+gentree $1 mdlss $2
+. log
+
+rm  mdlss.fst
+rm  mdlss.lk1 mdlss.lk2
+
+echo
+echo "Fim: genmdlss"
+echo
+
+TPR="end"
+. log

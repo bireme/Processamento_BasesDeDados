@@ -1,0 +1,46 @@
+#----------------------------------------------------------------------#
+# GENMDLTI - Procedimento para geracao do invertido de TItulo.
+#
+# Marcelo - 01/03/94 
+# Execucaco - Processamento
+# Sintaxe: genmdlti <dbn_mdlbb> <loopcheck>
+#    onde:
+#          <dbn_mdlbb> base de dados MEDLINE (mdlbb).
+#          <loopcheck> intervalo para checks.
+#
+#----------------------------------------------------------------------#
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genmdlti"
+echo
+
+if [ "$#" -ne 2 ]
+then 
+   TPR="fatal"
+   MSG="use: genmdlti <dbn_mdlbb> <loopcheck>"
+   . log 
+fi
+
+# -------------------------------------------------------------------- #
+# WRKTI.FST 
+# -------------------------------------------------------------------- #
+cat>mdlti.fst<<!
+4 4 mpl,(v352|%|/,v130|%|/,v380|%|/)
+!
+TPR="iffatal"
+MSG="Erro: gentree TI"
+gentree $1 mdlti $2
+. log
+
+rm mdlti.lk1 mdlti.lk2
+rm mdlti.fst
+
+echo
+echo "Fim: genmdlti"
+echo
+
+TPR="end"
+. log

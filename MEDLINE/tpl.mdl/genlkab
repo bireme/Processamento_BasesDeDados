@@ -1,0 +1,104 @@
+# ------------------------------------------------------------------------- #
+# GENMDLAB -  Procedimento para geracao do invertido ABstract. 
+#
+# Marcelo - 10/03/94
+# Execucao - Processamento
+# Sintaxe: genlkab <dbn_mdlbb> <loopcheck>
+#    onde:
+#          <dbn_mdlbb> base de dados MEDLINE com ABSTRACT (mdlbb).
+#          <loopcheck> intervalo para checks.
+#
+# ------------------------------------------------------------------------ #
+
+TPR="start"
+. log
+
+echo
+echo "Inicio: genlkab"
+echo
+
+if 
+  [ "$#" -ne 2 ]
+then
+  TPR="fatal"
+  MSG="Use: genlkab <dbn_mdlbb> <loopcheck>"
+  . log
+fi
+
+# -------------------------------------------------------------------------- #
+# Geracao do invertido AB (Abstract)
+# -------------------------------------------------------------------------- #
+
+# FST Generation 
+
+cat > mdlab.fst <<!
+5 4 mpl,v370
+!
+
+# ------------------------------------------------------------------- #
+# Extracao das chaves - Geracao dos arquivos LN's
+# ------------------------------------------------------------------- #
+# chamada antiga - 10/06/2010
+#TPR="iffatal"
+#MSG="Erro na extracao das chaves LN's"
+#../tpl.mdl/genlnmdl $1 mdlab "@mdlab.fst"
+#. log
+
+# chamada nova - 10/06/2010
+
+echo "extracting keys AB1..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do AB1"
+mx $1 "fst=@mdlab.fst" ln1=mdlab1.ln1 ln2=mdlab1.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do AB1"
+genlk -s mdlab1.lk1 mdlab1.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do AB1"
+genlk -s mdlab1.lk2 mdlab1.ln2
+. log
+
+# incluido 09/06/2010
+
+echo "extracting keys AB3..."
+TPR="iffatal"
+MSG="Erro na extracao das chaves LN's do AB3"
+mx $1 "fst=@mdlab.fst" actab=$TABS/ac850XT.tab gizmo=../tabs/galfabeto ln1=mdlab3.ln1 ln2=mdlab3.ln2 +fix/m -all now tell=100000
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK1 do AB3"
+genlk -s mdlab3.lk1 mdlab3.ln1
+. log
+
+TPR="iffatal"
+MSG="Erro na classificacao das chaves LK2 do AB3"
+genlk -s mdlab3.lk2 mdlab3.ln2
+. log
+
+# merge do RN1 + RN3
+TPR="iffatal"
+MSG="Erro no merge mdlab.lk1 mdlab1.lk1 mdlab3.lk1"
+genlk -m mdlab.lk1 mdlab1.lk1 mdlab3.lk1
+. log
+
+TPR="iffatal"
+MSG="Erro no merge mdlab.lk2 mdlab1.lk2 mdlab3.lk2"
+genlk -m mdlab.lk2 mdlab1.lk2 mdlab3.lk2
+. log
+
+rm mdlab.fst
+rm mdlab1.ln1 mdlab1.ln2 mdlab1.lk1 mdlab1.lk2
+rm mdlab3.ln1 mdlab3.ln2 mdlab3.lk1 mdlab3.lk2
+
+
+echo
+echo "Fim: genlkab"
+echo
+
+TPR="end"
+. log
