@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # -------------------------------------------------------------------------- #
-# poscoleta_bbo.sh - Prove transformacao no dado recebido para presaneamento #
+# coleta_dspace.sh - Efetua coleta de dados por dSpace                       #
 # -------------------------------------------------------------------------- #
-# Chamada : poscoleta_bbo.sh <ID_FI>
-# Exemplo : poscoleta_bbo.sh bbo
+# Chamada : coleta_oai.sh [-V] <FI>
+# Exemplo : coleta_oai.sh arc
 # -------------------------------------------------------------------------- #
 #  Centro Latino-Americano e do Caribe de Informação em Ciências da Saúde    #
 #     é um centro especialidado da Organização Pan-Americana da Saúde,       #
@@ -15,42 +15,61 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20180520, FJLopes
+vrs:  0.00 20160602, FJLopes
 	- Edicao original
+vrs:  0.01 20160607, FJLopes
+	- Limpeza de codigo e comentarios
 HISTORICO
 
 # ========================================================================== #
 #                                BIBLIOTECAS                                 #
 # ========================================================================== #
 # Incorpora biblioteca de controle basico de processamento
+#source $PATH_EXEC/inc/infi_exec.inc
 source  $MISC/infra/infoini.inc
 
 # Incorpora biblioteca de processos de coleta
 source ../shs.lil/inc/coletas.inc
-
-# Assume valores DEFAULT
-NOERRO=0;	# Controla o modo de ignorar erros
-DEBUG=0;	# Controla o nivel de depuracao
+# Conta com as funcoes:
+#  clANYTHING   PARM1   Retorna o ID da FI
+#  clDIRETORIO  PARM1   Retorna o diretorio de trabalho para a FI
+#  clSIGLA      PARM1   Retorna a sigla humana da FI
+#  clTYPE       PARM1   Retorna o tipo de coleta da FI
+#  clSSERVER    PARM1   Retorna o SOURCE SERVER da FI
+#  clSDIRETORIO PARM1   Retorna o diretorio dos dados no SSERVER
+#  clUSER       PARM1   Retorna username para tomar dados da FI no SSERVER
+#  clPASSWD     PARM1   Retorna password
+#  clTODAS      PARM1   Retorna a lista de FIs (se PARM1 sera o arquivo)
+#  clLIB                Retorna a informacao geral da library
+#  clSTATUS     PARM1   Retorna false / true (ID da FI) se ativa
+#  clINFO       PARM1   Exibe a configuracao da FI
+#
 
 # ========================================================================== #
 #                                  FUNCOES                                   #
 # ========================================================================== #
 parseFL(){
-        IFS=";" read -a FILES <<< "$1"
+	IFS=";" read -a FILES <<< "$1"
 }
-	
+
+# Incorpora carregador de defaults padrao
+unset NOERRO
+OPC_ERRO=""
+DEBUG=0
+PARMD=""
+
 # Mensagens de HELP
 #        1         2         3         4         5         6         7         8
 #2345678901234567890123456789012345678901234567890123456789012345678901234567890
 AJUDA_USO="
-Syntax: $TREXE <ID_FI>
+Uso: $TREXE [-V] <InfoS>
 
-Options:
- -V, --version       * Displays the current version of program
+Opções:
+ -V, --version       * Exibe a versão corrente do programa
+     * Se usada interrompe a execução do programa
 
-Parameters:
- ID_FI - Identifier of Information Source to process (in this case must be bbo)
-
+Parâmetros:
+ InfoS  Identificador da Fonte de Informacao
 "
 
 # Tratador de opcoes
@@ -67,36 +86,29 @@ do
 			if [ $(expr index $1 "-") -ne 1 ]; then
 				if test -z "$PARM1"; then PARM1=$1; shift; shift; continue; fi
 				if test -z "$PARM2"; then PARM2=$1; shift; shift; continue; fi
-				if test -z "$PARM3"; then PARM3=$1; shift; shift; continue; fi
-				if test -z "$PARM4"; then PARM4=$1; shift; shift; continue; fi
-				if test -z "$PARM5"; then PARM5=$1; shift; shift; continue; fi
-				if test -z "$PARM6"; then PARM6=$1; shift; shift; continue; fi
-				if test -z "$PARM7"; then PARM7=$1; shift; shift; continue; fi
-				if test -z "$PARM8"; then PARM8=$1; shift; shift; continue; fi
-				if test -z "$PARM9"; then PARM9=$1; shift; shift; continue; fi
 			else
-				echo "Opções não válida ($1)"
+				echo "Opção não válida! ($1)"
 			fi
 			;;
 	esac
 	# Argumento tratado, desloca os parametros e trata o proximo (se existir)
 	shift
 done
-
 # Avalia o nivel de depuracao
 [ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
 [ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
 
 # ========================================================================== #
+
 #     1234567890123456789012345
-echo "[pcbbo]  1         - Inicia processamento de pos coleta de BBO"
+echo "[c_dsp]  1         - Inicia processamento de coleta por Isis OAI Provider"
 # -------------------------------------------------------------------------- #
-# Garante que a o parametro 1 seja informado (sai com codigo de erro 2 - Syntax Error)
-if [ "$PARM1" != "bbo" ]; then
+# Garante que a FI seja informada (sai com codigo de erro 2 - Syntax Error)
+if [ -z "$PARM1" ]; then
         #     1234567890123456789012345
-        echo "[pcbbo]  1.01      - Erro na chamada falta o parametro 1 ou esta errado"
+        echo "[c_dsp]  1.01      - Erro na chamada falta o parametro 1"
         echo
-        echo "Syntax error:- PARM1 missing or wrong"
+        echo "Syntax error:- Missing PARM1"
         echo "$AJUDA_USO"
         exit 2
 fi
@@ -104,18 +116,18 @@ fi
 # -------------------------------------------------------------------------- #
 # Garante existencia da tabela de configuracao (sai com codigo de erro 3 - Configuration Error)
 #                                            1234567890123456789012345
-[ ! -s "../tabs/coletas.tab" ] && echo "[pcbbo]  1.01      - Configuration error:- COLETAS table not found" && exit 3
-
+[ $N_DEB -ne 0 ]               && echo "[c_dsp]  0.00.04   - Testa se ha tabela de configuracao"
+[ ! -s "../tabs/coletas.tab" ] && echo "[c_dsp]  1.01      - Configuration error:- COLETAS table not found" && exit 3
 unset   SIGLA
 # Garante existencia do FI indicada na tabela de configuracao (sai com codigo de erro 4 - Configuration Failure)
 # alem de tomar nome oficial do indice para processamento
 #                         1234567890123456789012345
-[ $N_DEB -ne 0 ] && echo "[pcbbo]  0.00.01   - Testa se o indice eh valido"
+[ $N_DEB -ne 0 ] && echo "[c_dsp]  0.00.05   - Testa se o indice eh valido"
 IDFI=$(clANYTHING $PARM1)
 [ $? -eq 0 ]     && SIGLA=$(clSIGLA $IDFI)
-[ -z "$SIGLA" ]  && echo "[pcbbo]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
+[ -z "$SIGLA" ]  && echo "[c_dsp]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
 
-echo "[pcbbo]  1.01      - Carrega definicoes da fonte para coleta de dados"
+echo "[c_dsp]  1.01      - Carrega definicoes da fonte para coleta de dados"
   TIPOC=$(clTYPE       $IDFI)
  DIRETO=$(clDIRETORIO  $IDFI)
 SSERVER=$(clSSERVER    $IDFI)
@@ -124,31 +136,27 @@ SDIRETO=$(clSDIRETORIO $IDFI)
   PORTA=$(clPORT       $IDFI)
  USERCL=$(clUSER       $IDFI)
  PASSCL=$(clPASSWD     $IDFI)
-
 # -------------------------------------------------------------------------- #
-# Garante que a rotina certa para a FI
-
-[ "$IDFI" != "bbo" ] && echo "[pcbbo]  1.02      - Com esta chamada so se processa $SIGLA, verifique!" && exit 2
+# Garante que a rotina certa para o tipo de coleta da FI
+[ "$TIPOC" != "dspace" ] && echo "[c_dsp]  1.02      - Configuration mismatch:- Only the dSpace method is supported by this program!" && exit 4
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
-
-# Regra 1 se não ha especificacao deve ser M/F LILACS
-[ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "[pcbbo]  1.02.01   - Tentou o ajuste"
-
+echo "[c_dsp]  1.02      - Efetua ajustamentos conforme regras implicitas"
+# Regra 1 se nao ha especificacao deve ser M/F LILACS mas não para OAI
+[ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "[c_dsp]  1.02.01   - Tentou o ajuste"
 # Regra 2 se não especifica a extensao deve ser mst e xrf
 egrep '\.' >/dev/null <<<$OBJETO
 RSP=$?
 if [ $RSP -ne 0 ]; then
-	[ $TIPOC = "oai" -o $TIPOC = "dspace" ] || OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}" && echo "[pcbbo]  1.02.02   - Extensoes ajustadas"
+	[ $TIPOC = "oai" -o $TIPOC = "dspace" ] || OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}" && echo "[c_dsp]  1.02.02  - Extensoes ajustadas"
 fi
 
-# -------------------------------------------------------------------------- #
-echo "[pcbbo]  1.02.03   - Obtem os arquivos componentes (se houver)"
+echo "[p_dsp]  1.02.03   - Obtem os arquivos componentes (se houver)"
 parseFL $OBJETO
 
 # Determina o numero de arquivos da lista
-echo "[pcbbo]  1.02.04   - Quantifica componentes a obter"
+echo "[p_dsp]  1.02.04   - Quantifica componentes a obter"
 i=0
 while [ ! -z ${FILES[$i]} ]
 do
@@ -156,8 +164,8 @@ do
 done
 # Obtem o numero de arquivos passados na lista [0..[
 MAXFILE=$(expr $i - 1)
-
 # -------------------------------------------------------------------------- #
+
 if [ $N_DEB -ne 0 ]; then
 	echo "==========================================================="
 	echo "  == COLETA RSYNC =="
@@ -186,59 +194,65 @@ if [ $N_DEB -ne 0 ]; then
 	echo "==========================================================="
 fi
 # -------------------------------------------------------------------------- #
+
 # Faz corrente o diretorio de processamento
-echo "[pcbbo]  1.02      - Faz corrente o diretorio de processamento"
+echo "[c_dsp]  1.03      - Faz corrente o diretorio de processamento"
+cd $SDIRETO
+
+# Efetua a tomada dos dados
+echo "[c_dsp]  2         - Efetiva a transferencia de dados"
+
+for i in $(seq 0 $MAXFILE)
+do
+	./0_Processa.sh ${FILES[$i]}
+	RSP=$?
+	chkError $RSP "ERROR: [p_dsp] Coletando o componente ${FILES[$i]}"
+done
+
 cd $DIRETO
 
-# Gera um Master File para BBO com o nome LILACS para proceguir no tratamento homogeneo 
-echo "[pcbbo]  2         - Efetua a mudanca de ISO 2709 para M/F de ${FILES[0]}, e da outras tratativas"
-echo "[bcbbo]  2.01      - Preventivamente executa uma conversao DOS para UNIX"
-dos2unix -f ${FILES[0]}
-echo "[pcbbo]  2.02      - Cria M/F para o restante do processamento"
-$LINDG4/mx iso=${FILES[0]} create=LILACS -all now
-RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
-chkError $RSP "ERROR: [pcbbo] Convertendo ISO-2709 em M/F de BBO"
-
-echo "[pcbbo]  3         - Finaliza execucao de $TREXE"
-# Armazena historicamente do ISO aqui tratado
-echo "[pcbbo]  3.01      - Armazena ISO coletado em diretório apropriado"
-echo "[pcbbo]  3.01.01   - Garante existencia do diretorio destino para arquivos ISO-2709"
-[ -d "isos" ] || mkdir -p isos
-
-echo "[pcbbo]  3.01.02   - Movimenta arquivo renomeando"
-mv ${FILES[0]} isos/${FILES[0]}.$DTISO
+echo "[c_dsp]  3         - Finda execucao da coleta"
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
-exit 0
 
-
-
-
-
-
+# -------------------------------------------------------------------------- #
 cat > /dev/null <<COMMENT
-.    Entrada : PARM1 com o identificador da BBO
-.      Saida : M/F LILACS gerado no diretorio bbo.lil
-.   Corrente : nao determinado, desde que compensado na chamada
-.    Chamada : /bases/lilG4/shs.lil/poscoleta_bbo.sh bbo
-.Objetivo(s) : Garantir a existencia do M/F LILACS para proxima etapa do processamento
-.Comentarios : Após o tratamento com sucesso deposita o ISO utilizado no diretorio 'isos'
-.              agregando a data de processamento para efeito histórico
-.Observacoes : A tabela coletas.tab deve ser atualizada em funcao do nome do arquivo
-.              disponibilizado pela Biblioteca da Odontologia
+.    Entrada :  PARM1 identificando a FI a operar
+.               Opcoes de execucao
+.                -V, --versao   Mostra a versao
+.      Saida :  Arquivos da Fonte de Informacao coletados
+.               Codigos de retorno:
+.                 0 - Ok operation
+.                 1 - Non specific error
+.                 2 - Syntax Error
+.                 3 - Configuration error (iAHx.tab not found)
+.                 4 - Configuration failure (INDEX_ID unrecognized; wrong method; ...)
+.   Corrente :  --
+.    Chamada :  coleta_dspace.sh [-V] <ID_FI>
+.    Exemplo :  nohup ../shs.lil/coleta_dspace.sh arc &> logs/YYYYMMDD.colDSPC.txt &
+.Objetivo(s) :  1- Coletar novos dados da FI
+.Comentarios :
+.Observacoes :  DEBUG eh uma variavel mapeada por bit conforme
+.                       _BIT0_  Aguarda tecla <ENTER>
+.                       _BIT1_  Mostra mensagens de DEBUG
+.                       _BIT2_  Modo verboso
+.                       _BIT3_  Modo debug de linhas -v
+.                       _BIT4_  Modo debug de linhas -x
+.                       _BIT7_  Opera em modo FAKE
+.      Notas :
 .Dependencia :  Tabela coletas.tab deve estar presente em ../tabs
 .               COLUNA  NOME                    COMENTARIOS
 .                1      ID_FI               ID da Fonte de Informacao     (Identificador unico)
 .                2      SIGLA FI            Nome humano da FI
 .                3      DIRETORIO           Diretorio de entrega dos dados
 .                4      TIPO                Tipo de coleta para aFI (valores: scp / ftp / rsync / oai / dSpace)
-.                5      FONTE DE DADOS      (todos os componentes devem ser declarados mesmo que vazios)
-.                       ^h=                 HOSTNAME onde se encontram os dados
+.                5      FONTE DE DADOS
+.                       ^h=                 HOSTNAME onde se encontram os dados (full path)
 .                       ^d=                 Diretorio dos dados na fonte
 .                       ^l=                 PORT TCP/IP a ser utilizado (quando cabivel)
-.                       ^p=                 Username a ser utilizado no processo
-.                       ^s=                 Senha do ususario a ser empregada na autenticacao
+.                       ^p=                 Username a ser utilizado no processo (se necessario)
+.                       ^s=                 Senha do ususario a ser empregada na autenticacao (se necessario)
 .                       ^b=                 Lista de arquivos (separados por ;) a coletar
 .               Variaveis de ambiente que devem estar previamente ajustadas:
 .               geral           BIREME - Path para o diretorio com especificos da BIREME
@@ -265,15 +279,14 @@ cat > /dev/null <<COMMENT
 .               ISIS      FFI1660 - WXISF1660  - Path para pacote
 .               ISIS       FFI512 - WXISF512   - Path para pacote
 .               ISIS        FFIG4 - WXISFG4    - Path para pacote
-.               ISIS       FFI4G4 - WXISF4G4   - Path para pacote
 .               ISIS       FFI256 - WXISF256   - Path para pacote
 .               ISIS     FFI512G4 - WXISF512G4 - Path para pacote
 
-<MOREINFO
-De forma geral caso ocorra iso_getval, coisa comum para a bbo, basta efetuar um dos2unix no ISO recebido.
 COMMENT
-cat >/dev/null <<SPICEDHAM
+exit
+cat > /dev/null <<SPICEDHAM
 CHANGELOG
-20160520 Edicao original
+20160524 Edição original
+20160607 Enxugemento de codigo e comentarios
 SPICEDHAM
 
