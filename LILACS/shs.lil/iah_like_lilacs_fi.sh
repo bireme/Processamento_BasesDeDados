@@ -5,6 +5,9 @@
 # -------------------------------------------------------------------------- #
 # Chamada : iah_fi.sh [-V] <ID_FI>
 # Exemplo : nohup ../shs.lil/iah_fi.sh bde &> logs/$(date '+%Y%m%d').IAH.txt &
+# ATENCAO : Aceita entrada nas mascaras: ???_pre_saneamento
+#                                        ???_lil_saneada
+#                                        ???_lil_pos_saneada
 # -------------------------------------------------------------------------- #
 #  Centro Latino-Americano e do Caribe de Informação em Ciências da Saúde    #
 #     é um centro especialidado da Organização Pan-Americana da Saúde,       #
@@ -15,8 +18,10 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20160608, FJLopes
+vrs:  0.00 20160610, FJLopes
 	- Edicao original
+vrs:  0.01 20160615, FJLopes
+	- Aceita multiplos nomes de entrada
 HISTORICO
 
 # ========================================================================== #
@@ -71,8 +76,8 @@ do
 done
 
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 #     1234567890123456789012345
@@ -119,30 +124,28 @@ echo "[iahfi]  1.02      - Faz corrente o diretorio de processamento"
 cd $DIRETO
 
 echo "[iahfi]  1.03      - Normaliza denominacao da M/F de entrada"
-# Verifica se existe ${IDFI}_saneada.mst ou ${IDFI}_saneada2.mst, caso nenhuma exista eh erro
-RSP=0; [ ! -f ${IDFI}_lil_saneada.xrf -a ! -f ${IDFI}_lil_saneada2.xrf ] && RSP=7
+# Verifica se existe ${IDFI}_pre_saneamento.mst ou ${IDFI}_saneada.mst ou ${IDFI}_saneada2.mst, caso nenhuma exista eh erro
+RSP=0; [ ! -f ${IDFI}_pre_saneamento.xrf -a ! -f ${IDFI}_lil_saneada.xrf -a ! -f ${IDFI}_lil_saneada2.xrf ] && RSP=7
 [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "${IDFI} master file is unavailable or unreachable"
 
-echo "[iahfi]  1.03.01   - Substitui resultado de pos_saneamento pelo de saneamento"
-[ -f "${IDFI}_lil_saneada2.mst" ] || mv ${IDFI}_lil_saneada.mst ${IDFI}_lil_saneada2.mst 
-[ -f "${IDFI}_lil_saneada2.xrf" ] || mv ${IDFI}_lil_saneada.xrf ${IDFI}_lil_saneada2.xrf
-
-# Adequa as condicoes do processamento LILACS
-echo "[iahfi]  1.03.02   - Ajusta para condicoes de processamento"
-mv ${IDFI}_lil_saneada2.mst lil.mst
-mv ${IDFI}_lil_saneada2.xrf lil.xrf
-
-# IMPORTANTE: a entrada deste processo eh a base de dados "lil.mst" (representa a LILACS.mst ao final do saneamento)
+echo "[iahfi]  1.03.01   - Seleciona M/F a usar entre pre_saneamento / lil_saneamento / pos_saneamento"
+[   -f "${IDFI}_pos_saneamento.mst" -a   -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] ||  cp ${IDFI}_pos_saneada.mst    lil.mst
+[   -f "${IDFI}_pos_saneamento.xrf" -a   -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] ||  cp ${IDFI}_pos_saneada.xrf    lil.xrf
+[ ! -f "${IDFI}_pos_saneamento.mst" -a   -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] ||  cp ${IDFI}_lil_saneada.mst    lil.mst
+[ ! -f "${IDFI}_pos_saneamento.xrf" -a   -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] ||  cp ${IDFI}_lil_saneada.xrf    lil.xrf
+[ ! -f "${IDFI}_pos_saneamento.mst" -a ! -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] ||  cp ${IDFI}_pre_saneamento.mst lil.mst
+[ ! -f "${IDFI}_pos_saneamento.xrf" -a ! -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] ||  cp ${IDFI}_pre_saneamento.xrf lil.xrf
 
 #----------------------------------------------------------------------#
+# IMPORTANTE: a entrada deste processo eh a base de dados "lil.mst" (representa a LILACS.mst ao final do saneamento)
 # Gera a base de dados de mail para processamento
 
 echo "[iahfi]  2         - Normaliza denominacao da M/F de entrada"
 
 echo "[iahfi]  2.01      - Geracao de mail para ${IDFI}"
 MSG="Erro na geracao do mail"
-../tpl.lil/genlilmail.sh lil ../tpl.mail/nmail mail
+ ../tpl.lil/genlilmail.sh lil ../tpl.mail/nmail mail
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -151,7 +154,7 @@ chkError $RSP "$MSG"
 
 echo "[iahfi]  2.01      - Faselilmh - Geracao de invertidos de MH para ${IDFI}"
 MSG="Erro na Faselilmh"
-../tpl.lil/faselilmh.sh lil 50000
+ ../tpl.lil/faselilmh.sh lil 50000
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -160,7 +163,7 @@ chkError $RSP "$MSG"
 
 echo "[iahfi]  2.02      - Faseliltw - Geracao de invertidos de TEXT WORK  (TW) para ${IDFI}"
 MSG="Erro na Faseliltw"
-../tpl.lil/faseliltw lil 50000
+ ../tpl.lil/faseliltw lil 50000
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -169,7 +172,7 @@ chkError $RSP "$MSG"
 
 echo "[iahfi]  2.03      - Faseliln - Geracao de outros invertidos para ${IDFI}"
 MSG="Erro na Faseliln"
-../tpl.lil/faseliln.sh lil
+ ../tpl.lil/faseliln.sh lil
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -180,13 +183,20 @@ echo "[iahfi]  3         - Finalizacao do processamento de ${IDFI}"
 # Gera IY0 - 21/05/2007
 echo "[iahfi]  3.01      - Compactacao de indices de ${IDFI}"
 MSG="Erro: GENIY0ALL.SH"
-../tpl.lil/geniy0all.sh $1
+ ../shs.lil/geniy0all.sh lil
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
-echo "[iahfi]  3.02      - Limpeza do diretorio"
+echo "[iahfi]  3.02      - Retira M/F de entrada intermediaria daqui"
+[ -d input ] || mkdir -p input
+mv ${IDFI}.{mst,xrf} input
+mv ${IDFI}_LILACS*   input
+mv ${IDFI}_lil*      input
+mv ${IDFI}_pre*      input
+
+echo "[iahfi]  3.03      - Limpeza do diretorio"
 MSG="Erro: LIMPALIL.SH "
-../tpl.lil/limpalil.sh $1
+ ../tpl.lil/limpalil.sh lil
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -255,6 +265,7 @@ Comentarios adicionais caem bem aqui.
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160608 Edicao original do processamento fatorado de LILACS para iAH
+20160610 Edicao original do processamento fatorado de LILACS para iAH
+20160615 Julga qual base usar entre pre_saneamento, lil_saneada, e pos_saneada, preferindo pos sobre lil sobre pre
 SPICEDHAM
 
