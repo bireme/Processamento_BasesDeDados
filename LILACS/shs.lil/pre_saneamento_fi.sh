@@ -15,7 +15,7 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20160602, FJLopes
+vrs:  0.00 20160610, FJLopes
 	- Edicao original
 HISTORICO
 
@@ -77,8 +77,8 @@ do
 done
 
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 #     1234567890123456789012345
@@ -186,12 +186,12 @@ echo "[ps_fi]  2.01      - Normaliza denominacao do M/F de entrada"
 
 echo "[ps_fi]  2.02      - Normaliza campos de descritores, URL internet e limpa campos de temas (etapa 1/4)"
 
-echo "gizmo=../tabs/g87,87,88"                                                 >  pre_sano1.in;	/* normaliza campos descr para sub-d e sub-s como devido*/
-echo "gizmo=../tabs/gV8homolog,8"                                              >> pre_sano1.in; /* Retira .homologo do URL para texto completo */
-echo "proc='d8',if p(v8^u) then |a8Internet^i|v8^u|| else |a8|v8|| fi" >> pre_sano1.in; /* Normaliza v8 para padrao de endereco de Internet */
-echo "proc='d870d880'"                                                         >> pre_sano1.in; /* Libera campo para temas */
-echo "proc='d870d880'"                                                         >> pre_sano1.in; /* Libera campo para temas */
-echo "proc='S'"                                                                >> pre_sano1.in; /* Ordena campos do registro */
+echo "gizmo=../tabs/g87,87,88"                                                 >  pre_sano1.in;	# normaliza campos descr para sub-d e sub-s como devido
+echo "gizmo=../tabs/gV8homolog,8"                                              >> pre_sano1.in; # Retira .homologo do URL para texto completo
+echo "proc='d8',if p(v8^u) then |a8Internet^i|v8^u|| else |a8|v8|| fi" >> pre_sano1.in; # Normaliza v8 para padrao de endereco de Internet
+echo "proc='d870d880'"                                                         >> pre_sano1.in; # Libera campo para temas
+echo "proc='d870d880'"                                                         >> pre_sano1.in; # Libera campo para temas
+echo "proc='S'"                                                                >> pre_sano1.in; # Ordena campos do registro
 echo "now"                                                                     >> pre_sano1.in
 echo "-all"                                                                    >> pre_sano1.in
 echo "tell=50000"                                                              >> pre_sano1.in
@@ -204,9 +204,9 @@ chkError $RSP "ERROR: [ps_fi] Etapa 1 de 4"
 # Nao sera executado, so faz numero ate ser liberado para execucao
 echo "[ps_fi]  2.03      - Aplica gizmos em descritores e reversao de metodologia (etapa 2/4)"
 
-echo "gizmo=../tabs/g87,87,88"      >  pre_sano2.in;	/* normaliza campos descr para sub-d e sub-s como devido */
-echo "proc=@../tabs/lilnew2old.prc" >> pre_sano2.in;	/* Coloca a base em conformidade com a antiga metodologia LILACS */
-echo "proc='d235'"                  >> pre_sano2.in;	/* Promove limpeza de campos */
+echo "gizmo=../tabs/g87,87,88"      >  pre_sano2.in;	# normaliza campos descr para sub-d e sub-s como devido
+echo "proc=@../tabs/lilnew2old.prc" >> pre_sano2.in;	# Coloca a base em conformidade com a antiga metodologia LILACS
+echo "proc='d235'"                  >> pre_sano2.in;	# Promove limpeza de campos
 echo "-all"                         >> pre_sano2.in
 echo "now"                          >> pre_sano2.in
 echo "tell=50000"                   >> pre_sano2.in
@@ -301,6 +301,6 @@ Comentarios adicionais caem bem aqui.
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160602 Edicao original
+20160610 Edicao original
 SPICEDHAM
 

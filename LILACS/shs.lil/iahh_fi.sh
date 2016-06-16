@@ -15,7 +15,7 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20160602, FJLopes
+vrs:  0.00 20160610, FJLopes
         - Edicao inicial
 HISTORICO
 
@@ -70,8 +70,8 @@ do
 done
 
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 #     1234567890123456789012345
@@ -124,18 +124,21 @@ echo "[iahhm]  2.01      - Montando endereco de destino"
 DIRDEST=/home/basesG4/lil/$(basename $DIRETO)
 
 echo "[iahhm]  2.02      - Garante existencia do destino"
-ssh $TRANSFER@serverw "[ -d $DIRDEST ] || mkdir -p $DIRDEST"
-ssh $TRANSFER@serverw "[ -d $DIRDEST ]"
+ssh $TRANSFER@${SHiAH} "[ -d $DIRDEST ] || mkdir -p $DIRDEST"
+ssh $TRANSFER@${SHiAH} "[ -d $DIRDEST ]"
 chkError $? "ERROR: [iahhm] Nao pode criar destino"
 
 echo "[iahhm]  2.03      - Efetiva a transferencia de M/F's de $SIGLA"
-scp *.mst *.xrf $TRANSFER@serverw:$DIRDEST
+scp *.mst *.xrf $TRANSFER@${SHiAH}:$DIRDEST
 chkError $? "ERROR: [iahhm] Nao pode copiar M/F de $SIGLA"
 
 echo "[iahhm]  2.04      - Efetiva a transferencia de I/F's de $SIGLA"
 cd iy0
-scp *.* $TRANSFER@serverw:$DIRDEST
+scp *.* $TRANSFER@${SHiAH}:$DIRDEST
 chkError $? "ERROR: [iahhm] Nao pode copiar I/F de $SIGLA"
+
+echo "[iahhm]  2.05      - Envia e-mail para ITI solicitando atualizacao emproducao"
+$PROCS/emailITI.sh bde
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -218,6 +221,6 @@ Comentarios que poderiam ser usados como informacao adicional podem ser colocado
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160602 Edicao original de atualizacao de iAH-homologacao
+20160610 Edicao original de atualizacao de iAH-homologacao
 SPICEDHAM
 
