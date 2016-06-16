@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # -------------------------------------------------------------------------- #
-# coleta_rsync.sh - Efetua coleta de dados por remote syncronism             #
+# coleta_rsync.sh - Efetua coleta de dados por remote syncronism - rsync     #
 # -------------------------------------------------------------------------- #
-# Chamada : coleta_rsync.sh [-h|-i|-V|--changelog] [-d N] <FI>
+# Chamada : coleta_rsync.sh [-V] <FI>
 # Exemplo : coleta_rsync.sh tit
-#           coleta_rsync.sh -d 2 nml
+#           coleta_rsync.sh nml
 # -------------------------------------------------------------------------- #
 #  Centro Latino-Americano e do Caribe de Informação em Ciências da Saúde    #
 #     é um centro especialidado da Organização Pan-Americana da Saúde,       #
@@ -16,8 +16,10 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20180519, FJLopes
+vrs:  0.00 20160519, FJLopes
 	- Edicao original
+vrs:  0.00 20160610, FJLopes
+	- Limpeza de codigo e comentarios
 HISTORICO
 
 # ========================================================================== #
@@ -26,32 +28,6 @@ HISTORICO
 # Incorpora biblioteca de controle basico de processamento
 #source $PATH_EXEC/inc/infi_exec.inc
 source  $MISC/infra/infoini.inc
-# Conta com as funcoes:
-#  isNumber     PARM1   Retorna FALSE se PARM1 nao for numerico
-#  iVersao      --      Exibe nome e versao do programa
-#  rdConfig     PARM1   Item de configuracao a ser lido no arquivo
-#                       variavel $CONFIG contem o FULL NAME do arquivo
-#  rdBreak      --      Testa se deve interromper execucao com "pare"
-#  hms          PARM1   Converte valor informado em segundos para HH:MM:SS
-#  chkError     PARM1   codigo de retorno a testar
-#               PARM2   Mensagem de erro se houver
-#                       Retorna com o codigo de PARM1
-#                       variavel $NOERRO qdo ajustada ignora erros
-# Estabelece as variaveis:
-#       HINIC   Tempo inicial em segundos desde 01/01/1970
-#       HRINI   Hora de inicio no formato YYYYMMDD hh:mm:ss
-#       DRINI   Diretorio inicial de execucao
-#       _dow_   Dia da semana abreviado
-#       _DOW_   Dia da semana de 0 (domingo) a 6 (sabado)
-#       _DIA_   Dia calendario no formato DD
-#       _MES_   Mes calendario no formato MM
-#       _ANO_   Ano calendario no formato YYYY
-#       TREXE   Demoninacao do programa em execucao
-#       TRNAM   Denominacao do programa em execucao sem extensao
-#       PRGDR   Path para o programa em execucao
-#       LCORI   Linha de comando original da chamada
-#       DTISO   Data calendario no formato YYYYMMDD
-#       N_DEB   Nivel de debug
 
 # Incorpora biblioteca de processos de coleta
 source ../shs.lil/inc/coletas.inc
@@ -80,23 +56,18 @@ parseFL(){
 # Incorpora carregador de defaults padrao
 unset NOERRO
 OPC_ERRO=""
+DEBUG=0
 PARMD=""
 
 # Mensagens de HELP
 #        1         2         3         4         5         6         7         8
 #2345678901234567890123456789012345678901234567890123456789012345678901234567890
 AJUDA_USO="
-Uso: $TREXE [-h|-i|-V|--changelog] [-d N] [-e] <InfoS>
+Uso: $TREXE [-V] <InfoS>
 
 Opções:
- --changelog         * Exibe o histórico de alterações
- -d, --debug NIVEL   Define nivel de depuracao com valor numerico positivo
- -e, --no-error      Ignora detecção de erros
- -h, --help          * Exibe este texto de ajuda a execucao
- -i, --info          * Exibe infomacoes sobre coletas
  -V, --version       * Exibe a versão corrente do programa
-
- * Interrompem a execução do programa
+     * Se usada interrompe a execução do programa
 
 Parâmetros:
  InfoS  Identificador da Fonte de Informacao
@@ -106,57 +77,6 @@ Parâmetros:
 while test -n "$1"
 do
 	case "$1" in
-		--changelog)
-			TOTLN=$(wc -l $0 | awk '{ print $1 }')
-			INILN=$(grep -n "<SPICEDHAM" $0 | tail -1 | cut -d ":" -f "1")
-			LINHAI=$(expr $TOTLN - $INILN)
-			LINHAF=$(expr $LINHAI - 2)
-			iVersao
-			#echo -e -n "\n$TREXE "
-			#grep '^vrs: ' $PRGDR/$TREXE | tail -1
-			echo -n "==> "
-			tail -$LINHAI $0 | head -$LINHAF
-			echo
-			exit
-			;;
-
-		-d | --debug)
-			shift
-			isNumber $1
-			[ $? -ne 0 ] && echo -e "\n$TREXE: O argumento da opção DEBUG deve ser numérico.\n$AJUDA_USO" && exit 2
-			DEBUG=$1
-			N_DEB=$(expr $(($DEBUG & 6)) / 2)
-			 FAKE=$(expr $(($DEBUG & $_BIT7_)) / 128)
-			;;
-
-		-e | --no-error)
-			NOERRO="1"
-			OPC_ERRO="-e"
-			;;
-
-		-h | --help)
-			iVersao
-			echo "$AJUDA_USO"
-			exit 0
-			;;
-
-		-i | --info)
-			DUMMY=$(egrep -n "^<MOREINFO" $0 | tail -1 | cut -d ":" -f "1")
-			INILN=${DUMMY:-0}
-			FIMLN=$(grep -n "<SPICEDHAM" $0 | tail -1 | cut -d ":" -f "1")
-			TOTLN=$(wc -l $0 | awk '{ print $1 }')
-			LINHAI=$(expr $TOTLN - $INILN)
-			QTDELN=$(expr $LINHAI - 6)
-			iVersao
-			echo
-			if [ $INILN -ne 0 ]; then
-				tail -$LINHAI $0 | head -$QTDELN
-			else
-				echo -e "Não há informações a exibir.\n"
-			fi
-			exit 0
-			;;
-
 		-V | --version)
 			iVersao
 			echo
@@ -167,8 +87,6 @@ do
 			if [ $(expr index $1 "-") -ne 1 ]; then
 				if test -z "$PARM1"; then PARM1=$1; shift; shift; continue; fi
 				if test -z "$PARM2"; then PARM2=$1; shift; shift; continue; fi
-				if test -z "$PARM3"; then PARM3=$1; shift; shift; continue; fi
-				if test -z "$PARM4"; then PARM4=$1; shift; shift; continue; fi
 			else
 				echo "Opção não válida! ($1)"
 			fi
@@ -177,13 +95,9 @@ do
 	# Argumento tratado, desloca os parametros e trata o proximo (se existir)
 	shift
 done
-# Para DEBUG assume o valor DEFAULT antecipadamente
-isNumber $DEBUG
-[ $? -ne 0 ] && DEBUG="0"
-[ "$DEBUG" -ne "0" ] && PARMD="-d $DEBUG"
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 
@@ -205,7 +119,6 @@ fi
 #                                            1234567890123456789012345
 [ $N_DEB -ne 0 ]               && echo "[c_rsy]  0.00.04   - Testa se ha tabela de configuracao"
 [ ! -s "../tabs/coletas.tab" ] && echo "[c_rsy]  1.01      - Configuration error:- COLETAS table not found" && exit 3
-
 unset   SIGLA
 # Garante existencia do FI indicada na tabela de configuracao (sai com codigo de erro 4 - Configuration Failure)
 # alem de tomar nome oficial do indice para processamento
@@ -216,6 +129,7 @@ IDFI=$(clANYTHING $PARM1)
 [ -z "$SIGLA" ]  && echo "[c_rsy]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
 
 echo "[c_rsy]  1.01      - Carrega definicoes da fonte para coleta de dados"
+  TIPOC=$(clTYPE       $IDFI)
  DIRETO=$(clDIRETORIO  $IDFI)
 SSERVER=$(clSSERVER    $IDFI)
 SDIRETO=$(clSDIRETORIO $IDFI)
@@ -223,14 +137,15 @@ SDIRETO=$(clSDIRETORIO $IDFI)
   PORTA=$(clPORT       $IDFI)
  USERCL=$(clUSER       $IDFI)
  PASSCL=$(clPASSWD     $IDFI)
+# -------------------------------------------------------------------------- #
+# Garante que a rotina certa para o tipo de coleta da FI
+[ "$TIPOC" != "rsync" ] && echo "[c_rsy]  1.02      - Configuration mismatch:- Only the rsync method is supported by this program!" && exit 4
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
-
 echo "[c_rsy]  1.02      - Efetua ajustamentos conforme regras implicitas"
 # Regra 1 se nao ha especificacao deve ser M/F LILACS
 [ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "Tentou o ajuste"
-
 # Regra 2 se não especifica a extensao deve ser mst e xrf
 egrep '\.' >/dev/null <<<$OBJETO
 RSP=$?
@@ -238,7 +153,6 @@ if [ $RSP -ne 0 ]; then
 	OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}"
 fi
 
-# -------------------------------------------------------------------------- #
 parseFL $OBJETO
 
 # Determina o numero de arquivos da lista
@@ -249,6 +163,7 @@ do
 done
 # Obtem o numero de arquivos passados na lista [0..[
 MAXFILE=$(expr $i - 1)
+# -------------------------------------------------------------------------- #
 
 if [ $N_DEB -ne 0 ]; then
 	echo "==========================================================="
@@ -283,10 +198,8 @@ cd $DIRETO
 # Efetua a tomada dos dados
 echo "[c_rsy]  2         - Efetiva a transferencia de dados"
 echo "[c_rsy]  2.01      - Sincroniza arquivos"
-
 for i in $(seq 0 $MAXFILE)
 do
-
 	echo "[c_rsy]  2.01.0$i   -  Copiando ${FILES[$i]} de $SIGLA"
 	egrep 'LILACS' >/dev/null <<<${FILES[$i]}
 	RSP=$?
@@ -297,7 +210,9 @@ do
 	fi
 	RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 	chkError $RSP "Sincronizando ${FILES[$i]} de $SIGLA"
-
+	# Fica permissoes do arquivo recebido
+	chmod ug=rw ${FILES[$i]}
+	chmod  o=r  ${FILES[$i]}
 done
 
 # Incorpora biblioteca de controle basico de processamento
@@ -307,11 +222,6 @@ source  $MISC/infra/infofim.inc
 cat > /dev/null <<COMMENT
 .    Entrada :  PARM1 identificando a FI a operar
 .               Opcoes de execucao
-.                --changelog    Mostra historico de alteracoes
-.                -d, --debug    Nivel de depuracao [0..255]
-.                -e, --no-error Ignora detecao de erros
-.                -h, --help     Mostra o help
-.                -i, --info     Informacoes adicionais sobre o processo
 .                -V, --versao   Mostra a versao
 .      Saida :  Arquivos da Fonte de Informacao coletados
 .               Codigos de retorno:
@@ -319,10 +229,10 @@ cat > /dev/null <<COMMENT
 .                 1 - Non specific error
 .                 2 - Syntax Error
 .                 3 - Configuration error (iAHx.tab not found)
-.                 4 - Configuration failure (INDEX_ID unrecognized)
-.   Corrente :  /bases/lilG4//FI_DIR/
-.    Chamada :  1-index.sh [-h|-V|--changelog] [-a] [-d N] [-e] [-f] [-i] <ID_INDEX>
-.    Exemplo :  nohup 1-index.sh -d 2 ghl &> logs/YYYYMMDD.index.txt &
+.                 4 - Configuration failure (INDEX_ID unrecognized; wrong method; ...)
+.   Corrente :  --
+.    Chamada :  coleta_rsync.sh [-V] <ID_FI>
+.    Exemplo :  nohup ../shs.lil/coleta_rsync.sh tit &> logs/YYYYMMDD.colRSY.txt &
 .Objetivo(s) :  1- Atualizar Fonte de Informacao
 .Comentarios :
 .Observacoes :  DEBUG eh uma variavel mapeada por bit conforme
@@ -371,54 +281,38 @@ cat > /dev/null <<COMMENT
 .               ISIS      FFI1660 - WXISF1660  - Path para pacote
 .               ISIS       FFI512 - WXISF512   - Path para pacote
 .               ISIS        FFIG4 - WXISFG4    - Path para pacote
-.               ISIS       FFI4G4 - WXISF4G4   - Path para pacote
 .               ISIS       FFI256 - WXISF256   - Path para pacote
 .               ISIS     FFI512G4 - WXISF512G4 - Path para pacote
+
+<MOREINFO
+Códigos de retorno do rsync
+.    0  Success
+.    1  Syntax or usage error
+.    2  Protocol incompatibility
+.    3  Errors selecting input/output files, dirs
+.    4  Requested action not supported: an attempt was made to manipulate 64-bit files on a platform that cannot support them;  or  an  option  was
+.       specified that is supported by the client and not by the server.
+.    5  Error starting client-server protocol
+.    6  Daemon unable to append to log-file
+.   10  Error in socket I/O
+.   11  Error in file I/O
+.   12  Error in rsync protocol data stream
+.   13  Errors with program diagnostics
+.   14  Error in IPC code
+.   20  Received SIGUSR1 or SIGINT
+.   21  Some error returned by waitpid()
+.   22  Error allocating core memory buffers
+.   23  Partial transfer due to error
+.   24  Partial transfer due to vanished source files
+.   25  The --max-delete limit stopped deletions
+.   30  Timeout in data send/receive
+.   35  Timeout waiting for daemon connection
+
 COMMENT
 exit
-cat > /dev/null <<COMMENT
-REINFO
-Em funcao do que sera coletado mudam:
--servidor de origem dos dados
--diretorio de destinacao dos dados
--desempacotamento de dados
-
-FI             SIGLA    SERVER  DIRETORIO                        ROTINA ou TIPO DE
-======================================================================================================================
-HISA           his       OFI4   /bases/lilG4/his.lil             wget (http://basehisa.coc.fiocruz.br/P/hisa.iso)
-BBO            bbo       OFI4   /bases/lilG4/bbo.lil             ftp ftp.xxxxxx.br/home/bbo/bases/lildbi/dbcertif/lilacs/ user: ??? senha: ???
-ADOLEC-BR      abr       OFI4   /bases/lilG4/abr.lil             scp hm01dx /home/aplicacoes-bvs/adolec-br/bases/lildbi/dbcertif/lilacs/LILACS
-BDEnf          bde       OFI4   /bases/lilG4/bde.lil             scp pr10vm /home/apps/bvs.br/wp-enfermagem/bases/lildbi/dbcertif/lilacs/LILACS
-ColecionaSUS   sus       OFI4   /bases/lilG4/sus.lil             scp pr20dx.bireme.br /home/aplicacoes/coleciona-sus/bases/lildbi/dbcertif/lilacs/LILACS
-CRT/AIDS       crt       OFI4   /bases/lilG4/crt.lil             scp hm02dx /home/aplicacoes-bvs/crt-dst-aids/bases/iah/lilacs
-HOMEOINDEX     hom       OFI4   /bases/lilG4/hom.lil             scp hm01dx /home/aplicacoes-bvs/homeopatia/bases/lildbi/dbcertif/lilacs/LILACS
-LILACS         lil       OFI4   /bases/lilG4/lil.lil             scp serverabd /home/lilacs/www/bases/lildbi/dbcertif/lilacs/LILACS
-MS             mis       OFI4   /bases/lilG4/mis.lil             scp pr20dx.bireme.br /home/aplicacoes/abcd-ms/bases/lildbi/dbcertif/lilacs/LILACS
-IBECS          ibc       OFI4   /bases/ibcG4/ibc.lil/isos/bases  scp pv10vm /home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs/amalia
-.                                                                           /home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs/Anabel
-.                                                                           /home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs/jmg5
-.                                                                           /home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs/maribel2
-.                                                                           /home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs/marisol
-.                                                                           /home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs/LILACS
-NMail          nmail     OFI4   /bases/lilG4/tpl.mail            rsync quartzo2 /home/intranet/bases/nmail/nmail
-TITLE          title     OFI4   $TABS                            rsync quartzo2 /home/intranet/bases/portal/newprocs/isos/title.iso
-BIOETICA       bioetica  OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Processa.sh bioetica
-BIVIPSIL       bivipsil  OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Processa.sh bivipsil bivipsil
-CUMED          cumed     OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Processa.sh cumed cumed
-FIOCRUZ        fiocruz   OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Processa.sh fiocruz
-IEC            iec       OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Procerssa.sh iac iacbvs
-Peru MinSA     bvsperu   OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Processa.sh bvsperu minsa
-Peru Nacional  peru      OFI5   /bases/xml2isis/oai/isis         ../tpl/0_Processa.sh peru nac
-VETERINARIA              OFI5   /bases/xml2isis/oai/tpl          0_Processa.sh vetteses
-.                                                                0_Processa.sh vetindex
-ARCA                     OFI5   /bases/xml2isis/oai/tpl          ../tpl.lil/0_Processa.sh arcadim
-.                                                                ../tpl.lil/0_Processa.sh arcamodis
-Medline        mdl       OFI5   /bases/mdlG4/fasea               ../tpl.mdl/traz_mdl_update_files.sh YY
-
-
-COMMENT
 cat > /dev/null <<SPICEDHAM
 CHANGELOG
 20160513 Edição original
+20160610 Enxugamento de codigo e comentarios
 SPICEDHAM
 

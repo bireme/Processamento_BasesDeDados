@@ -17,7 +17,7 @@
 cat > /dev/null <<HISTORICO
 vrs:  0.00 20160602, FJLopes
 	- Edicao original
-vrs:  0.01 20160607, FJLopes
+vrs:  0.01 20160610, FJLopes
 	- Limpeza de codigo e comentarios
 HISTORICO
 
@@ -95,8 +95,8 @@ do
 	shift
 done
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 
@@ -287,6 +287,6 @@ exit
 cat > /dev/null <<SPICEDHAM
 CHANGELOG
 20160524 Edição original
-20160607 Enxugemento de codigo e comentarios
+20160610 Enxugemento de codigo e comentarios
 SPICEDHAM
 
