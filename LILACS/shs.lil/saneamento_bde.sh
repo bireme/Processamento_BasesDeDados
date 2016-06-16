@@ -15,7 +15,7 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20160608, FJLopes
+vrs:  0.00 20160610, FJLopes
 	- Edicao original
 HISTORICO
 
@@ -77,8 +77,8 @@ do
 done
 
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 #     1234567890123456789012345
@@ -137,8 +137,8 @@ chkError $RSP "${IDFI} master file is unavailable or unreachable"
 
 # -------------------------------------------------------------------------- #
 echo "[snbde]  3         - Ajusta nome do M/F de saida"
-mv ${IDFI}_pre_saneamento.mst ${IDFI}_lil_saneada.mst
-mv ${IDFI}_pre_saneamento.xrf ${IDFI}_lil_saneada.xrf
+cp ${IDFI}_pre_saneamento.mst ${IDFI}_lil_saneada.mst
+cp ${IDFI}_pre_saneamento.xrf ${IDFI}_lil_saneada.xrf
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -203,6 +203,6 @@ Comentarios adicionais caem bem aqui.
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160602 Edicao original
+20160610 Edicao original
 SPICEDHAM
 

@@ -5,6 +5,7 @@
 # -------------------------------------------------------------------------- #
 # Chamada : poscoleta_bbo.sh <ID_FI>
 # Exemplo : poscoleta_bbo.sh bbo
+# ATENCAO : Deste procedimento sai um M/F denominado LILACS
 # -------------------------------------------------------------------------- #
 #  Centro Latino-Americano e do Caribe de Informação em Ciências da Saúde    #
 #     é um centro especialidado da Organização Pan-Americana da Saúde,       #
@@ -15,8 +16,10 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20180520, FJLopes
+vrs:  0.00 20160610, FJLopes
 	- Edicao original
+vrs:  0.01 20160615, FJLopes
+	- Ajustes na denominacao do M/F de saida
 HISTORICO
 
 # ========================================================================== #
@@ -35,6 +38,7 @@ DEBUG=0;	# Controla o nivel de depuracao
 # ========================================================================== #
 #                                  FUNCOES                                   #
 # ========================================================================== #
+# Parse File List
 parseFL(){
         IFS=";" read -a FILES <<< "$1"
 }
@@ -67,15 +71,8 @@ do
 			if [ $(expr index $1 "-") -ne 1 ]; then
 				if test -z "$PARM1"; then PARM1=$1; shift; shift; continue; fi
 				if test -z "$PARM2"; then PARM2=$1; shift; shift; continue; fi
-				if test -z "$PARM3"; then PARM3=$1; shift; shift; continue; fi
-				if test -z "$PARM4"; then PARM4=$1; shift; shift; continue; fi
-				if test -z "$PARM5"; then PARM5=$1; shift; shift; continue; fi
-				if test -z "$PARM6"; then PARM6=$1; shift; shift; continue; fi
-				if test -z "$PARM7"; then PARM7=$1; shift; shift; continue; fi
-				if test -z "$PARM8"; then PARM8=$1; shift; shift; continue; fi
-				if test -z "$PARM9"; then PARM9=$1; shift; shift; continue; fi
 			else
-				echo "Opções não válida ($1)"
+				echo "Not valid option ($1)"
 			fi
 			;;
 	esac
@@ -84,8 +81,8 @@ do
 done
 
 # Avalia o nivel de depuracao
-[ $((DEBUG & $_BIT3_)) -ne 0 ] && -v
-[ $((DEBUG & $_BIT4_)) -ne 0 ] && -x
+[ $((DEBUG & $_BIT3_)) -ne 0 ] && set -v
+[ $((DEBUG & $_BIT4_)) -ne 0 ] && set -x
 
 # ========================================================================== #
 #     1234567890123456789012345
@@ -190,7 +187,7 @@ fi
 echo "[pcbbo]  1.02      - Faz corrente o diretorio de processamento"
 cd $DIRETO
 
-# Gera um Master File para BBO com o nome LILACS para proceguir no tratamento homogeneo 
+# Gera um Master File para BBO com o nome LILACS para prosseguir no tratamento homogeneo 
 echo "[pcbbo]  2         - Efetua a mudanca de ISO 2709 para M/F de ${FILES[0]}, e da outras tratativas"
 echo "[bcbbo]  2.01      - Preventivamente executa uma conversao DOS para UNIX"
 dos2unix -f ${FILES[0]}
@@ -206,7 +203,8 @@ echo "[pcbbo]  3.01.01   - Garante existencia do diretorio destino para arquivos
 [ -d "isos" ] || mkdir -p isos
 
 echo "[pcbbo]  3.01.02   - Movimenta arquivo renomeando"
-mv ${FILES[0]} isos/${FILES[0]}.$DTISO
+# mv ${FILES[0]} isos/${FILES[0]}.$DTISO		PREVISAO DE ACUMULACAO HISTORICA
+[-f ${FILES[0]} ] && rm -f ${FILES[0]}
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -274,6 +272,6 @@ De forma geral caso ocorra iso_getval, coisa comum para a bbo, basta efetuar um 
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160520 Edicao original
+20160610 Edicao original
 SPICEDHAM
 
