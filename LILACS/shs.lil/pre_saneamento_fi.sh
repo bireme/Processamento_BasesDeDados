@@ -17,6 +17,8 @@
 cat > /dev/null <<HISTORICO
 vrs:  0.00 20160610, FJLopes
 	- Edicao original
+vrs:  0.01 20160614, FJLopes
+	- Adicao de tratamento de URL em pre_sano1.in
 HISTORICO
 
 # ========================================================================== #
@@ -186,15 +188,26 @@ echo "[ps_fi]  2.01      - Normaliza denominacao do M/F de entrada"
 
 echo "[ps_fi]  2.02      - Normaliza campos de descritores, URL internet e limpa campos de temas (etapa 1/4)"
 
-echo "gizmo=../tabs/g87,87,88"                                                 >  pre_sano1.in;	# normaliza campos descr para sub-d e sub-s como devido
-echo "gizmo=../tabs/gV8homolog,8"                                              >> pre_sano1.in; # Retira .homologo do URL para texto completo
-echo "proc='d8',if p(v8^u) then |a8Internet^i|v8^u|| else |a8|v8|| fi" >> pre_sano1.in; # Normaliza v8 para padrao de endereco de Internet
-echo "proc='d870d880'"                                                         >> pre_sano1.in; # Libera campo para temas
-echo "proc='d870d880'"                                                         >> pre_sano1.in; # Libera campo para temas
-echo "proc='S'"                                                                >> pre_sano1.in; # Ordena campos do registro
-echo "now"                                                                     >> pre_sano1.in
-echo "-all"                                                                    >> pre_sano1.in
-echo "tell=50000"                                                              >> pre_sano1.in
+if [ ! -s "../tabs/norm_v8.prc" ]; then
+	echo " 'd8'"                                          >  ../tabs/norm_v8.prc
+	echo " if v8>'' then"                                 >> ../tabs/norm_v8.prc
+	echo "   'a8'"                                      >> ../tabs/norm_v8.prc
+	echo "   if p(v8^u) then |Internet^i|v8^u else v8 fi" >> ../tabs/norm_v8.prc
+	echo "   if p(v8^q) then |^q|v8^q fi"                 >> ../tabs/norm_v8.prc
+	echo "   if p(v8^y) then |^y|v8^y fi"                 >> ../tabs/norm_v8.prc
+	echo "   ''"                                        >> ../tabs/norm_v8.prc
+	echo " fi"                                            >> ../tabs/norm_v8.prc
+fi
+
+echo "gizmo=../tabs/g87,87,88"    >  pre_sano1.in;	# normaliza campos descr para sub-d e sub-s como devido
+echo "gizmo=../tabs/gV8homolog,8" >> pre_sano1.in; # Retira .homologo do URL para texto completo
+echo "proc=@../tabs/norm_v8.prc"  >> pre_sano1.in; # Normaliza v8 para padrao de endereco de Internet
+echo "proc='d870d880'"            >> pre_sano1.in; # Libera campo para temas
+echo "proc='s'"                   >> pre_sano1.in; # Ordena campos do registro
+echo "now"                        >> pre_sano1.in
+echo "-all"                       >> pre_sano1.in
+echo "tell=50000"                 >> pre_sano1.in
+
 mx ${IDFI}_LILACS in=pre_sano1.in create=tmp_trash
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 mv tmp_trash.mst ${IDFI}.mst
@@ -227,7 +240,7 @@ chkError $RSP "ERROR: [ps_fi] Etapa 3 de 4"
 
 # Eh desejavel que esta seja a ultima etapa do pre saneamento das bases de dados CDS/ISIS
 echo "[ps_fi]  2.05      - Efetua uma copia limpa da base com MXCP (etapa 4/4)"
-mxcp ${IDFI} create=tmp_trash clean repeat=% period=. log=${IDFI}.mxcp.log tell=50000
+mxcp ${IDFI} create=tmp_trash clean period=. log=${IDFI}.mxcp.log tell=50000
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 mv tmp_trash.mst ${IDFI}_pre_saneamento.mst
 mv tmp_trash.xrf ${IDFI}_pre_saneamento.xrf
@@ -296,11 +309,17 @@ cat > /dev/null <<COMMENT
 .               ISIS       FFI256 - WXISF256   - Path para pacote
 .               ISIS     FFI512G4 - WXISF512G4 - Path para pacote
 
+= Versoes de proc de normalizacao do V8 historicas
+echo "proc='d8',if p(v8^u) then |a8Internet^i|v8^u|| else |a8|v8|| fi" >> pre_sano1.in
+echo "proc='d8',if p(v8^u) then |a8Internet^i|v8^u|^q|v8^q|^y|v8^y|| else |a8|v8|| fi" >> pre_sano1.in
+echo "proc='d8' if v8>'' then 'a8' if p(v8^u) then  |Internet^i|v8^u else v8 fi if p(v8^q) then |^q|v8^q fi if p(v8^y) then |^y|v8^y fi '' fi" >> pre_sano1.in
+
 <MOREINFO
 Comentarios adicionais caem bem aqui.
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
 20160610 Edicao original
+20160614 Adicao de tratamento mais detalhado da normalizacao de endereco de Internet em pre_sano1.in
 SPICEDHAM
 

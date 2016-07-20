@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # -------------------------------------------------------------------------- #
-# poscoleta_bbo.sh - Prove transformacao no dado recebido para presaneamento #
+# pos_coleta_cid.sh - Transforma o dado recebido para presaneamento          #
 # -------------------------------------------------------------------------- #
-# Chamada : poscoleta_bbo.sh <ID_FI>
-# Exemplo : poscoleta_bbo.sh bbo
+# Chamada : pos_coleta_cid.sh <ID_FI>
+# Exemplo : pos_coleta_cid.sh cid
 # ATENCAO : Deste procedimento sai um M/F denominado LILACS
 # -------------------------------------------------------------------------- #
 #  Centro Latino-Americano e do Caribe de Informação em Ciências da Saúde    #
@@ -16,10 +16,8 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20160610, FJLopes
+vrs:  0.00 20160714, FJLopes
 	- Edicao original
-vrs:  0.01 20160715, FJLopes
-	- Correcao de bug em comando test
 HISTORICO
 
 # ========================================================================== #
@@ -53,7 +51,7 @@ Options:
  -V, --version       * Displays the current version of program
 
 Parameters:
- ID_FI - Identifier of Information Source to process (in this case must be bbo)
+ ID_FI - Identifier of Information Source to process (in this case must be cid)
 
 "
 
@@ -86,12 +84,12 @@ done
 
 # ========================================================================== #
 #     1234567890123456789012345
-echo "[pcbbo]  1         - Inicia processamento de pos coleta de BBO"
+echo "[pccid]  1         - Inicia processamento de pos coleta de BBO"
 # -------------------------------------------------------------------------- #
 # Garante que a o parametro 1 seja informado (sai com codigo de erro 2 - Syntax Error)
-if [ "$PARM1" != "bbo" ]; then
+if [ "$PARM1" != "cid" ]; then
         #     1234567890123456789012345
-        echo "[pcbbo]  1.01      - Erro na chamada falta o parametro 1 ou esta errado"
+        echo "[pccid]  1.01      - Erro na chamada falta o parametro 1 ou esta errado"
         echo
         echo "Syntax error:- PARM1 missing or wrong"
         echo "$AJUDA_USO"
@@ -101,18 +99,18 @@ fi
 # -------------------------------------------------------------------------- #
 # Garante existencia da tabela de configuracao (sai com codigo de erro 3 - Configuration Error)
 #                                            1234567890123456789012345
-[ ! -s "../tabs/coletas.tab" ] && echo "[pcbbo]  1.01      - Configuration error:- COLETAS table not found" && exit 3
+[ ! -s "../tabs/coletas.tab" ] && echo "[pccid]  1.01      - Configuration error:- COLETAS table not found" && exit 3
 
 unset   SIGLA
 # Garante existencia do FI indicada na tabela de configuracao (sai com codigo de erro 4 - Configuration Failure)
 # alem de tomar nome oficial do indice para processamento
 #                         1234567890123456789012345
-[ $N_DEB -ne 0 ] && echo "[pcbbo]  0.00.01   - Testa se o indice eh valido"
+[ $N_DEB -ne 0 ] && echo "[pccid]  0.00.01   - Testa se o indice eh valido"
 IDFI=$(clANYTHING $PARM1)
 [ $? -eq 0 ]     && SIGLA=$(clSIGLA $IDFI)
-[ -z "$SIGLA" ]  && echo "[pcbbo]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
+[ -z "$SIGLA" ]  && echo "[pccid]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
 
-echo "[pcbbo]  1.01      - Carrega definicoes da fonte para coleta de dados"
+echo "[pccid]  1.01      - Carrega definicoes da fonte para coleta de dados"
   TIPOC=$(clTYPE       $IDFI)
  DIRETO=$(clDIRETORIO  $IDFI)
 SSERVER=$(clSSERVER    $IDFI)
@@ -125,27 +123,27 @@ SDIRETO=$(clSDIRETORIO $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que a rotina certa para a FI
 
-[ "$IDFI" != "bbo" ] && echo "[pcbbo]  1.02      - Com esta chamada so se processa $SIGLA, verifique!" && exit 2
+[ "$IDFI" != "cid" ] && echo "[pccid]  1.02      - Com esta chamada so se processa $SIGLA, verifique!" && exit 2
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
 
 # Regra 1 se não ha especificacao deve ser M/F LILACS
-[ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "[pcbbo]  1.02.01   - Tentou o ajuste"
+[ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "[pccid]  1.02.01   - Tentou o ajuste"
 
 # Regra 2 se não especifica a extensao deve ser mst e xrf
 egrep '\.' >/dev/null <<<$OBJETO
 RSP=$?
 if [ $RSP -ne 0 ]; then
-	[ $TIPOC = "oai" -o $TIPOC = "dspace" ] || OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}" && echo "[pcbbo]  1.02.02   - Extensoes ajustadas"
+	[ $TIPOC = "oai" -o $TIPOC = "dspace" ] || OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}" && echo "[pccid]  1.02.02   - Extensoes ajustadas"
 fi
 
 # -------------------------------------------------------------------------- #
-echo "[pcbbo]  1.02.03   - Obtem os arquivos componentes (se houver)"
+echo "[pccid]  1.02.03   - Obtem os arquivos componentes (se houver)"
 parseFL $OBJETO
 
 # Determina o numero de arquivos da lista
-echo "[pcbbo]  1.02.04   - Quantifica componentes a obter"
+echo "[pccid]  1.02.04   - Quantifica componentes a obter"
 i=0
 while [ ! -z ${FILES[$i]} ]
 do
@@ -184,27 +182,19 @@ if [ $N_DEB -ne 0 ]; then
 fi
 # -------------------------------------------------------------------------- #
 # Faz corrente o diretorio de processamento
-echo "[pcbbo]  1.02      - Faz corrente o diretorio de processamento"
+echo "[pccid]  1.02      - Faz corrente o diretorio de processamento"
 cd $DIRETO
 
-# Gera um Master File para BBO com o nome LILACS para prosseguir no tratamento homogeneo 
-echo "[pcbbo]  2         - Efetua a mudanca de ISO 2709 para M/F de ${FILES[0]}, e da outras tratativas"
-echo "[bcbbo]  2.01      - Preventivamente executa uma conversao DOS para UNIX"
+# Gera um Master File para PAHO com o nome cid_LILACS para prosseguir no tratamento homogeneo 
+echo "[pccid]  2         - Efetua a mudanca de ISO 2709 para M/F de ${FILES[0]}, e da outras tratativas"
+echo "[pccid]  2.01      - Preventivamente executa uma conversao DOS para UNIX"
 dos2unix -f ${FILES[0]}
-echo "[pcbbo]  2.02      - Cria M/F para o restante do processamento"
-$LINDG4/mx iso=${FILES[0]} create=LILACS -all now
+echo "[pccid]  2.02      - Cria M/F para o restante do processamento"
+mx iso=${FILES[0]} create=${IDFI}_LILACS -all now
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
-chkError $RSP "ERROR: [pcbbo] Convertendo ISO-2709 em M/F de BBO"
+chkError $RSP "ERROR: [pccid] Convertendo ISO-2709 em M/F de PAHO"
 
-echo "[pcbbo]  3         - Finaliza execucao de $TREXE"
-# Armazena historicamente do ISO aqui tratado
-echo "[pcbbo]  3.01      - Armazena ISO coletado em diretório apropriado"
-echo "[pcbbo]  3.01.01   - Garante existencia do diretorio destino para arquivos ISO-2709"
-[ -d "isos" ] || mkdir -p isos
-
-echo "[pcbbo]  3.01.02   - Movimenta arquivo renomeando"
-# mv ${FILES[0]} isos/${FILES[0]}.$DTISO		PREVISAO DE ACUMULACAO HISTORICA
-[ -f ${FILES[0]} ] && rm -f ${FILES[0]}
+echo "[pccid]  3         - Finaliza execucao de $TREXE"
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -217,9 +207,9 @@ exit 0
 
 cat > /dev/null <<COMMENT
 .    Entrada : PARM1 com o identificador da BBO
-.      Saida : M/F LILACS gerado no diretorio bbo.lil
+.      Saida : M/F cid_LILACS gerado no diretorio cid.lil
 .   Corrente : nao determinado, desde que compensado na chamada
-.    Chamada : /bases/lilG4/shs.lil/poscoleta_bbo.sh bbo
+.    Chamada : /bases/lilG4/shs.lil/pos_coleta_cid.sh cid
 .Objetivo(s) : Garantir a existencia do M/F LILACS para proxima etapa do processamento
 .Comentarios : Após o tratamento com sucesso deposita o ISO utilizado no diretorio 'isos'
 .              agregando a data de processamento para efeito histórico
@@ -268,11 +258,10 @@ cat > /dev/null <<COMMENT
 .               ISIS     FFI512G4 - WXISF512G4 - Path para pacote
 
 <MOREINFO
-De forma geral caso ocorra iso_getval, coisa comum para a bbo, basta efetuar um dos2unix no ISO recebido.
+Informacoes Adicionais
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160610 Edicao original
-20160715 Correcao de digitacao errada em comando faltando espaco apos em [-f 
+20160714 Edicao original
 SPICEDHAM
 

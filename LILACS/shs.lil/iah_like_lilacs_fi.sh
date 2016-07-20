@@ -130,12 +130,12 @@ RSP=0; [ ! -f ${IDFI}_pre_saneamento.xrf -a ! -f ${IDFI}_lil_saneada.xrf -a ! -f
 chkError $RSP "${IDFI} master file is unavailable or unreachable"
 
 echo "[iahfi]  1.03.01   - Seleciona M/F a usar entre pre_saneamento / lil_saneamento / pos_saneamento"
-[   -f "${IDFI}_pos_saneamento.mst" -a   -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] ||  cp ${IDFI}_pos_saneada.mst    lil.mst
-[   -f "${IDFI}_pos_saneamento.xrf" -a   -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] ||  cp ${IDFI}_pos_saneada.xrf    lil.xrf
-[ ! -f "${IDFI}_pos_saneamento.mst" -a   -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] ||  cp ${IDFI}_lil_saneada.mst    lil.mst
-[ ! -f "${IDFI}_pos_saneamento.xrf" -a   -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] ||  cp ${IDFI}_lil_saneada.xrf    lil.xrf
-[ ! -f "${IDFI}_pos_saneamento.mst" -a ! -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] ||  cp ${IDFI}_pre_saneamento.mst lil.mst
-[ ! -f "${IDFI}_pos_saneamento.xrf" -a ! -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] ||  cp ${IDFI}_pre_saneamento.xrf lil.xrf
+[   -f "${IDFI}_pos_saneamento.mst" -a   -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] &&  cp ${IDFI}_pos_saneamento.mst lil.mst
+[   -f "${IDFI}_pos_saneamento.xrf" -a   -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] &&  cp ${IDFI}_pos_saneamento.xrf lil.xrf
+[ ! -f "${IDFI}_pos_saneamento.mst" -a   -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] &&  cp ${IDFI}_lil_saneamento.mst lil.mst
+[ ! -f "${IDFI}_pos_saneamento.xrf" -a   -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] &&  cp ${IDFI}_lil_saneamento.xrf lil.xrf
+[ ! -f "${IDFI}_pos_saneamento.mst" -a ! -f "${IDFI}_lil_saneamento.mst" -a -f "${IDFI}_pre_saneamento.mst" ] &&  cp ${IDFI}_pre_saneamento.mst lil.mst
+[ ! -f "${IDFI}_pos_saneamento.xrf" -a ! -f "${IDFI}_lil_saneamento.xrf" -a -f "${IDFI}_pre_saneamento.xrf" ] &&  cp ${IDFI}_pre_saneamento.xrf lil.xrf
 
 #----------------------------------------------------------------------#
 # IMPORTANTE: a entrada deste processo eh a base de dados "lil.mst" (representa a LILACS.mst ao final do saneamento)
@@ -183,23 +183,22 @@ echo "[iahfi]  3         - Finalizacao do processamento de ${IDFI}"
 # Gera IY0 - 21/05/2007
 echo "[iahfi]  3.01      - Compactacao de indices de ${IDFI}"
 MSG="Erro: GENIY0ALL.SH"
- ../shs.lil/geniy0all.sh lil
+ ../shs.lil/geniy0all.sh lil ${IDFI}
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
 echo "[iahfi]  3.02      - Retira M/F de entrada intermediaria daqui"
 [ -d input ] || mkdir -p input
-mv ${IDFI}.{mst,xrf} input
-mv ${IDFI}_LILACS*   input
-mv ${IDFI}_lil*      input
-mv ${IDFI}_pre*      input
+[ -f ${IDFI}_pre_saneamento.xrf ] && mv ${IDFI}_pre*      input
+[ -f ${IDFI}_LILACS.xrf ]         && mv ${IDFI}_LILACS*   input
+[ -f ${IDFI}_lil.xrf ]            && mv ${IDFI}_lil*      input
+[ -f ${IDFI}.xrf ]                && mv ${IDFI}.{mst,xrf} input
 
 echo "[iahfi]  3.03      - Limpeza do diretorio"
 MSG="Erro: LIMPALIL.SH "
  ../tpl.lil/limpalil.sh lil
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
-
 # -------------------------------------------------------------------------- #
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -267,5 +266,6 @@ cat >/dev/null <<SPICEDHAM
 CHANGELOG
 20160610 Edicao original do processamento fatorado de LILACS para iAH
 20160615 Julga qual base usar entre pre_saneamento, lil_saneada, e pos_saneada, preferindo pos sobre lil sobre pre
+20160719 Movimenta residous de entrada para diretorio especifico (input)
 SPICEDHAM
 

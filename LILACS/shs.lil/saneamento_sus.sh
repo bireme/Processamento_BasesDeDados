@@ -113,8 +113,14 @@ echo "[s_sus]  1.02      - Faz corrente o diretorio de processamento"
 cd $DIRETO
 
 RSP=0
-echo "[s_sus]  1.03      - Verifica condicoes de processamento"
-[ -f ../tabs/gV8ColSUS.xrf ] || RSD=1
+echo "[s_sus]  1.03      - Verifica disponibilidade do M/F sus_pre_saqneamento"
+[ -f "${IDFI}_pre_saneamento.xrf" ] || RSP=1
+[ -f "${IDFI}_pre_saneamento.mst" ] || RSP=1
+chkError $RSP "ERRO: Base do Coleciona SUS nao encontrada"
+
+echo "[s_sus]  1.04      - Verifica condicoes de processamento"
+[ -f "../tabs/gV8ColSUS.xrf" ] || RSP=1
+[ -f "../tabs/gV8ColSUS.xrf" ] || RSP=1
 chkError $RSP "ERRO: Saneando ColecionaSUS"
 
 echo "[s_sus]  2         - Efetua o saneamento de ColecionaSUS"

@@ -20,13 +20,14 @@ vrs:  0.00 20160519, FJLopes
 	- Edicao original
 vrs:  0.01 20160610, FJLopes
 	- Limpa no codigo deixando so o essencial
+vrs:  0.02 20160623, FJLopes
+	- Admite este servidor como o fonte de dados
 HISTORICO
 
 # ========================================================================== #
 #                                BIBLIOTECAS                                 #
 # ========================================================================== #
 # Incorpora biblioteca de controle basico de processamento
-#source $PATH_EXEC/inc/infi_exec.inc
 source  $MISC/infra/infoini.inc
 # Conta com as funcoes:
 #  isNumber     PARM1   Retorna FALSE se PARM1 nao for numerico
@@ -122,7 +123,7 @@ do
 				if test -z "$PARM2"; then PARM2=$1; shift; shift; continue; fi
 			else
 				# Eh opcao mas nao foi tratada, eh desconhecida
-				echo "Opção não válida! ($1)"
+				echo "Opção não válida ($1)"
 			fi
 			;;
 	esac
@@ -181,7 +182,7 @@ SDIRETO=$(clSDIRETORIO $IDFI)
  PASSCL=$(clPASSWD     $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que seja a rotina certa para o tipo de coleta da FI
-[ "$TIPOC" != "scp" ] && echo "[c_scp]  1.02      - Configuration mismatch:- Only the scp method is supported by this program!" && exit 4
+[ "$TIPOC" != "scp" ] && echo "[c_scp]  1.02      - Configuration mismatch:- Only the scp method is supported by this program" && exit 4
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais [:INI:]
@@ -210,6 +211,10 @@ done
 # Obtem o numero de arquivos passados na lista [0..[
 MAXFILE=$(expr $i - 1)
 # Ajusta lista de arquivos conforme regras gerais [:FIM:]
+
+# Ajusta o servidor fonte de dados caso não exista assume este mesmo
+[ -z "$SSERVER" ] && SSERVER=$HOSTNAME
+
 # -------------------------------------------------------------------------- #
 # Mostra valores assumidos para execucao (se nivel de depuracao permitir)
 if [ $N_DEB -ne 0 ]; then
@@ -240,7 +245,7 @@ fi
 
 # Faz corrente o diretorio de processamento
 echo "[c_scp]  1.03      - Faz corrente o diretorio de processamento"
-[ -d "$DIRETO" ] || echo "[c_scp]  1.03.01   - Configuration mismatch:- Expected directory not found ($DIRETO)!"
+[ -d "$DIRETO" ] || echo "[c_scp]  1.03.01   - Configuration mismatch:- Expected directory not found ($DIRETO)"
 [ -d "$DIRETO" ] || exit 4
 cd $DIRETO
 
@@ -350,18 +355,18 @@ Em funcao do que sera coletado mudam:
 
 OFI FI  SIGLA         DIRETORIO                       Tipo    Configuracoes (h=host; d=diretorio; l=port; p=usuario; s=senha; b=objetos)
     ======================================================================================================================
- 4  bde BDEnf        /bases/lilG4/tst.lil             scp     ^h=pr10vm.bireme.br^d=/home/apps/bvs.br/wp-enfermagem/bases/lildbi/dbcertif/lilacs^l=8022^p=transfer^s=102030	
- 4  sus ColecionaSUS /bases/lilG4/sus.lil             scp     ^h=pr20dx.bireme.br^d=/home/aplicacoes/coleciona-sus/bases/lildbi/dbcertif/lilacs^l=8022^p=transfer^s=102030	
- 4  mis MS           /bases/lilG4/mis.lil             scp     ^h=pr20dx.bireme.br^d=/home/aplicacoes/abcd-ms/bases/lildbi/dbcertif/lilacs^l=8022^p=transfer^s=102030	
- 4  abr ADOLEC-BR    /bases/lilG4/abr.lil             scp     ^h=hm01dx.bireme.br^d=/home/aplicacoes-bvs/adolec-br/bases/lildbi/dbcertif/lilacs^l=22^p=transfer^s=102030	
- 4  crt CRT/AIDS     /bases/lilG4/crt.lil             scp     ^h=hm02dx.bireme.br^d=/home/aplicacoes-bvs/crt-dst-aids/bases/iah/lilacs^l=22^p=transfer^s=102030	
- 4  hom HOMEOIndex   /bases/lilG4/hom.lil             scp     ^h=hm01dx.bireme.br^d=/home/aplicacoes-bvs/homeopatia/bases/lildbi/dbcertif/lilacs^l=22^p=transfer^s=102030	
- 4  lil LILACS       /bases/lilG4/lil.lil             scp     ^h=serverabd^d=/home/lilacs/www/bases/lildbi/dbcertif/lilacs^l=22^p=transfer^s=102030	
- 4  ibc IBECS        /bases/ibcG4/ibc.lil/isos/bases  scp     ^h=pr10vm.bireme.br^d=/home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs^l=8022^p=transfer^s=102030^b=amalia;Anabel;jmg5;maribel2;marisol;LILACS	
- 4  bbo BBO          /bases/lilG4/tst.lil             ftp     ^h=ftp.bireme.br^d=/home/ftp/BBO_ofi_^l=21^p=BBO_ofi_^s=BBO_ofi_^b=BBOv36b.iso	
- 4  nml NMail        /bases/lilG4/tst.lil             rsync   ^h=quartzo2.bireme.br^d=/home/intranet/bases/nmail^l=22^p=transfer^s102030^b=nmail.fst;nmail.xrf;nmail.mst	
- 4  tit TITLE        /usr/local/bireme/tabs           rsync   ^h=quartzo2.bireme.br^d=/home/intranet/bases/portal/newprocs/isos/^l=22^p=transfer^s=102030^b=title.iso	
- 4  his HISA         /bases/lilG4/tst.lil	          wget    ^h=http://basehisa.coc.fiocruz.br/P/hisa.iso^d=/P^l=^p=^s=^b=hisa.iso	
+ ?  bde BDEnf        /bases/lilG4/tst.lil             scp     ^h=pr10vm.bireme.br^d=/home/apps/bvs.br/wp-enfermagem/bases/lildbi/dbcertif/lilacs^l=8022^p=transfer^s=102030	
+ ?  sus ColecionaSUS /bases/lilG4/sus.lil             scp     ^h=pr20dx.bireme.br^d=/home/aplicacoes/coleciona-sus/bases/lildbi/dbcertif/lilacs^l=8022^p=transfer^s=102030	
+ ?  mis MS           /bases/lilG4/mis.lil             scp     ^h=pr20dx.bireme.br^d=/home/aplicacoes/abcd-ms/bases/lildbi/dbcertif/lilacs^l=8022^p=transfer^s=102030	
+ ?  abr ADOLEC-BR    /bases/lilG4/abr.lil             scp     ^h=hm01dx.bireme.br^d=/home/aplicacoes-bvs/adolec-br/bases/lildbi/dbcertif/lilacs^l=22^p=transfer^s=102030	
+ ?  crt CRT/AIDS     /bases/lilG4/crt.lil             scp     ^h=hm02dx.bireme.br^d=/home/aplicacoes-bvs/crt-dst-aids/bases/iah/lilacs^l=22^p=transfer^s=102030	
+ ?  hom HOMEOIndex   /bases/lilG4/hom.lil             scp     ^h=hm01dx.bireme.br^d=/home/aplicacoes-bvs/homeopatia/bases/lildbi/dbcertif/lilacs^l=22^p=transfer^s=102030	
+ ?  lil LILACS       /bases/lilG4/lil.lil             scp     ^h=serverabd^d=/home/lilacs/www/bases/lildbi/dbcertif/lilacs^l=22^p=transfer^s=102030	
+ ?  ibc IBECS        /bases/ibcG4/ibc.lil/isos/bases  scp     ^h=pr10vm.bireme.br^d=/home/apps/bvsalud-org/lildbi-ibecs/bases/lildbi/dbnotcertif/lilacs^l=8022^p=transfer^s=102030^b=amalia;Anabel;jmg5;maribel2;marisol;LILACS	
+ ?  bbo BBO          /bases/lilG4/tst.lil             ftp     ^h=ftp.bireme.br^d=/home/ftp/BBO_ofi_^l=21^p=BBO_ofi_^s=BBO_ofi_^b=BBOv36b.iso	
+ ?  nml NMail        /bases/lilG4/tst.lil             rsync   ^h=quartzo2.bireme.br^d=/home/intranet/bases/nmail^l=22^p=transfer^s102030^b=nmail.fst;nmail.xrf;nmail.mst	
+ ?  tit TITLE        /usr/local/bireme/tabs           rsync   ^h=quartzo2.bireme.br^d=/home/intranet/bases/portal/newprocs/isos/^l=22^p=transfer^s=102030^b=title.iso	
+ ?  his HISA         /bases/lilG4/tst.lil             wget    ^h=http://basehisa.coc.fiocruz.br/P/hisa.iso^d=/P^l=^p=^s=^b=hisa.iso	
  5  pnc peru         /bases/lilG4/pnc.lil             oai     ^h=http://www.bvs.org.pe/isis-oai-provider/^d=/bases/xml2isis/oai/isis^l=PORT^p=USER^s=PASSWD^b=nac
  5  pru bvsperu      /bases/lilG4/pru.lil             oai     ^h=http://bvs.minsa.gob.pe/isis-oai-provider/^d=/bases/xml2isis/oai/isis^l=PORT^p=USER^s=PASSWD^b=minsa
  5  fio fiocruz      /bases/lilG4/fio.lil             oai     ^h=http://www.bvsdip.icict.fiocruz.br/isis-oai-provider^d=/bases/xml2isis/oai/isis^l=PORT^p=USER^s=PASSWD^b=far;aro;bam;car;dip;eps;bps;bvs;teh;cla;cam;crr;ens;ilm;int;tes;the
@@ -382,5 +387,6 @@ cat > /dev/null <<SPICEDHAM
 CHANGELOG
 20160513 Edição original
 20160610 Enxugamento de codigo, mais comentarios diferenciados para fins de documentacao
+20160623 Permite que o servidor hospedeiro seja fonte de dados para coleta
 SPICEDHAM
 
