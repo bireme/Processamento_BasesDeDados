@@ -84,7 +84,7 @@ done
 
 # ========================================================================== #
 #     1234567890123456789012345
-echo "[ps_fi]  1         - Inicia processamento de pos coleta de BBO"
+echo "[ps_fi]  1         - Inicia processamento de pre saneamento"
 # -------------------------------------------------------------------------- #
 # Garante que a o parametro 1 seja informado (sai com codigo de erro 2 - Syntax Error)
 if [ -z "$PARM1" ]; then
@@ -200,10 +200,10 @@ if [ ! -s "../tabs/norm_v8.prc" ]; then
 fi
 
 echo "gizmo=../tabs/g87,87,88"    >  pre_sano1.in;	# normaliza campos descr para sub-d e sub-s como devido
-echo "gizmo=../tabs/gV8homolog,8" >> pre_sano1.in; # Retira .homologo do URL para texto completo
-echo "proc=@../tabs/norm_v8.prc"  >> pre_sano1.in; # Normaliza v8 para padrao de endereco de Internet
-echo "proc='d870d880'"            >> pre_sano1.in; # Libera campo para temas
-echo "proc='s'"                   >> pre_sano1.in; # Ordena campos do registro
+echo "gizmo=../tabs/gV8homolog,8" >> pre_sano1.in;	# Retira .homologo do URL para texto completo
+echo "proc='d870d880'"            >> pre_sano1.in;	# Libera campo para temas
+echo "proc=@../tabs/norm_v8.prc"  >> pre_sano1.in;	# Normaliza v8 para padrao de endereco de Internet
+echo "proc='s'"                   >> pre_sano1.in;	# Ordena campos do registro
 echo "now"                        >> pre_sano1.in
 echo "-all"                       >> pre_sano1.in
 echo "tell=50000"                 >> pre_sano1.in

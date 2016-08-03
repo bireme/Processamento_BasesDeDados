@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # -------------------------------------------------------------------------- #
-# poscoleta_his.sh - Prove transformacao no dado recebido para presaneamento #
+# pos_coleta_pte.sh - Prove transformacao no dado recebido p presaneamento   #
 # -------------------------------------------------------------------------- #
-# Chamada : poscoleta_his.sh <ID_FI>
-# Exemplo : poscoleta_his.sh his
+# Chamada : pos_coleta_pte.sh <ID_FI>
+# Exemplo : pos_coleta_pte.sh pte
 # -------------------------------------------------------------------------- #
 #  Centro Latino-Americano e do Caribe de Informação em Ciências da Saúde    #
 #     é um centro especialidado da Organização Pan-Americana da Saúde,       #
@@ -15,7 +15,7 @@
 # Versao data, responsavel
 #       - Descricao
 cat > /dev/null <<HISTORICO
-vrs:  0.00 20160610, FJLopes
+vrs:  0.00 20160728, FJLopes
 	- Edicao original
 HISTORICO
 
@@ -49,7 +49,7 @@ Options:
  -V, --version       * Displays the current version of program
 
 Parameters:
- ID_FI - Identifier of Information Source to process (in this case must be his)
+ ID_FI - Identifier of Information Source to process (in this case must be pte)
 
 "
 
@@ -83,10 +83,10 @@ done
 
 # ========================================================================== #
 #     1234567890123456789012345
-echo "[pchis]  1         - Inicia processamento de pos coleta de HISA"
+echo "[pcpte]  1         - Inicia processamento de pos coleta de PTE"
 # -------------------------------------------------------------------------- #
 # Garante que a o parametro 1 seja informado (sai com codigo de erro 2 - Syntax Error)
-if [ "$PARM1" != "his" ]; then
+if [ "$PARM1" != "pte" ]; then
         #     1234567890123456789012345
         echo "[pcbbo]  1.01      - Erro na chamada falta o parametro 1 ou esta errado"
         echo
@@ -98,18 +98,18 @@ fi
 # -------------------------------------------------------------------------- #
 # Garante existencia da tabela de configuracao (sai com codigo de erro 3 - Configuration Error)
 #                                            1234567890123456789012345
-[ ! -s "../tabs/coletas.tab" ] && echo "[pchis]  1.01      - Configuration error:- COLETAS table not found" && exit 3
+[ ! -s "../tabs/coletas.tab" ] && echo "[pcpte]  1.01      - Configuration error:- COLETAS table not found" && exit 3
 
 unset   SIGLA
 # Garante existencia do FI indicada na tabela de configuracao (sai com codigo de erro 4 - Configuration Failure)
 # alem de tomar nome oficial do indice para processamento
 #                         1234567890123456789012345
-[ $N_DEB -ne 0 ] && echo "[pchis]  0.00.01   - Testa se o indice eh valido"
+[ $N_DEB -ne 0 ] && echo "[pcpte]  0.00.01   - Testa se o indice eh valido"
 IDFI=$(clANYTHING $PARM1)
 [ $? -eq 0 ]     && SIGLA=$(clSIGLA $IDFI)
-[ -z "$SIGLA" ]  && echo "[pchis]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
+[ -z "$SIGLA" ]  && echo "[pcpte]  1.01      - PARM error:- PARM1 does not indicate a valid index" && exit 4
 
-echo "[pchis]  1.01      - Carrega definicoes da fonte para coleta de dados"
+echo "[pcpte]  1.01      - Carrega definicoes da fonte para coleta de dados"
   TIPOC=$(clTYPE       $IDFI)
  DIRETO=$(clDIRETORIO  $IDFI)
 SSERVER=$(clSSERVER    $IDFI)
@@ -122,19 +122,19 @@ SDIRETO=$(clSDIRETORIO $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que a rotina certa para a FI
 
-[ "$IDFI" != "his" ] && echo '[pchis]  1.02      - Syntax error:- Only the HISA I.S. can be treated by this program. $SIGLA cannot!' && exit 2
+[ "$IDFI" != "pte" ] && echo '[pcpte]  1.02      - Syntax error:- Only the Index PSI Teses I.S. can be treated by this program. $SIGLA cannot!' && exit 2
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
 
 # Regra 1 se não ha especificacao deve ser M/F LILACS
-[ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "[pchis]  1.01.01   - Tentou o ajuste"
+[ -z $OBJETO ] && OBJETO="LILACS.xrf;LILACS.mst" && parseFL $OBJETO && echo "[pcpte]  1.01.01   - Tentou o ajuste"
 
 # Regra 2 se não especifica a extensao deve ser mst e xrf
 egrep '\.' >/dev/null <<<$OBJETO
 RSP=$?
 if [ $RSP -ne 0 ]; then
-	[ $TIPOC = "oai" -o $TIPOC = "dspace" ] || OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}" && echo "[pchis]  1.02.02   - Extensoes ajustadas"
+	[ $TIPOC = "oai" -o $TIPOC = "dspace" ] || OBJETO=${OBJETO//;/\.\{mst,xrf\};}".{mst,xrf}" && echo "[pcpte]  1.02.02   - Extensoes ajustadas"
 fi
 
 # -------------------------------------------------------------------------- #
@@ -181,28 +181,25 @@ if [ $N_DEB -ne 0 ]; then
 fi
 # -------------------------------------------------------------------------- #
 # Faz corrente o diretorio de processamento
-echo "[pchis]  1.02      - Faz corrente o diretorio de processamento"
+echo "[pcpte]  1.02      - Faz corrente o diretorio de processamento"
 cd $DIRETO
 
-# Gera um Master File para HISA com o nome LILACS para proceguir no tratamento homogeneo 
-echo "[pchis]  2         - Efetua a mudanca de ISO 2709 para M/F de ${FILES[0]}, e da outras tratativas"
-echo "[pchis]  2.01      - Testa disponibilidade do arquivo ${FILES[0]}"
-[ ! -f ${FILES[0]} ] && echo "[pchis]  2.01.01   - Arquivo ${FILES[0]} nao encontrado" && exit 1
-echo "[bchis]  2.02      - Preventivamente executa uma conversao DOS para UNIX"
-dos2unix -f ${FILES[0]}
-echo "[pchis]  2.03      - Cria M/F para o restante do processamento"
-$LINDG4/mx iso=${FILES[0]} create=LILACS -all now
-RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
-chkError $RSP "ERROR: [pchis] Convertendo ISO-2709 em M/F de HISA"
+echo "[pcpte]  2         - Efetua a mudanca de pte.{mst,xrf} para LILACS.{mst,xrf}"
+# Descompacta o M/F que vem tareado e comprimido
+echo "[pcpte]  2.01      - Testa disponibilidade do arquivo ${FILES[0]}"
+[ ! -f ${FILES[0]} ] && echo "[pcpte]  2.01.01   - Não foi possível localizar o arquivo de dados ${FILES[0]}" && exit 5 
 
-echo "[pchis]  3         - Finaliza execucao de $TREXE"
-# Armazena historicamente do ISO aqui tratado
-echo "[pchis]  3.01      - Armazena ISO coletado em diretório apropriado"
-echo "[pchis]  3.01.01   - Garante existencia do diretorio destino para arquivos ISO-2709"
-[ -d "isos" ] || mkdir -p isos
+echo "[pcpte]  2.02      - Descomprime o M/F tese"
+tar -xzvf ${FILES[0]}
 
-echo "[pchis]  3.01.02   - Movimenta arquivo renomeando"
-mv ${FILES[0]} isos/${FILES[0]}.$DTISO
+# Gera uma versão denominada LILACS do M/F pte
+echo "[pcpte]  2.03      - Move e renomeia o M/F recebido"
+mv home/bvspsi/bases/iah/tese.mst LILACS.mst
+mv home/bvspsi/bases/iah/tese.xrf LILACS.xrf
+
+# Limpa arvore de diretorio resultante da descompactacao
+echo "[pcpte]  3         - Finaliza execucao de $TREXE"
+rm -rf "home/bvspsi/bases/iah"
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -214,13 +211,12 @@ exit 0
 
 
 cat > /dev/null <<COMMENT
-.    Entrada : PARM1 com o identificador da HISA
-.      Saida : M/F LILACS gerado no diretorio his.lil
+.    Entrada : PARM1 com o identificador da PTE
+.      Saida : M/F LILACS gerado no diretorio pte.lil
 .   Corrente : nao determinado (deve ser compensado na chamada)
-.    Chamada : /bases/lilG4/shs.lil/poscoleta_his.sh his
+.    Chamada : /bases/lilG4/shs.lil/pos_coleta_pte.sh pte
 .Objetivo(s) : Garantir a existencia do M/F LILACS para proxima etapa do processamento
-.Comentarios : Após o tratamento com sucesso deposita o ISO utilizado no diretorio 'isos'
-.              agregando a data de processamento para efeito histórico
+.Comentarios :
 .Observacoes : 
 .Dependencia : Tabela coletas.tab deve estar presente em ../tabs
 .               COLUNA  NOME                    COMENTARIOS
@@ -269,6 +265,6 @@ De forma geral caso ocorra iso_getval, coisa comum para a bbo, basta efetuar um 
 COMMENT
 cat >/dev/null <<SPICEDHAM
 CHANGELOG
-20160610 Edicao original
+20160728 Edicao original
 SPICEDHAM
 

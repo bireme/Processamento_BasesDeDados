@@ -125,7 +125,7 @@ SDIRETO=$(clSDIRETORIO $IDFI)
 
 # -------------------------------------------------------------------------- #
 # Garante que eh a rotina certa para a FI
-[ "$IDFI" != "bde" ] && echo "[pcbde]  1.02      - Syntax error:- Only the BDE IS can be treated by this program. $SIGLA cannot!" && exit 2
+[ "$IDFI" != "bde" ] && echo '[pcbde]  1.02      - Syntax error:- Only the BDE I.S. can be treated by this program. $SIGLA cannot!' && exit 2
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
@@ -212,7 +212,7 @@ exit 0
 
 
 cat > /dev/null <<COMMENT
-.    Entrada : PARM1 com o identificador da HISA
+.    Entrada : PARM1 com o identificador da BDEnf
 .      Saida : M/F LILACS gerado no diretorio his.lil
 .   Corrente : nao determinado (deve ser compensado na chamada)
 .    Chamada : /bases/lilG4/shs.lil/poscoleta_his.sh his
@@ -266,6 +266,6 @@ cat >/dev/null <<SPICEDHAM
 CHANGELOG
 20160524 Edicao original
 20160602 Inclusão de adicao da porcao fixa no inicio da BDE
-20100610 Ajustamentos na finalizacao do processamento
+20160610 Ajustamentos na finalizacao do processamento
 SPICEDHAM
 

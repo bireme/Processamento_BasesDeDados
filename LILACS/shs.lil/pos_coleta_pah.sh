@@ -84,7 +84,7 @@ done
 
 # ========================================================================== #
 #     1234567890123456789012345
-echo "[pcpah]  1         - Inicia processamento de pos coleta de BBO"
+echo "[pcpah]  1         - Inicia processamento de pos coleta de PAHO"
 # -------------------------------------------------------------------------- #
 # Garante que a o parametro 1 seja informado (sai com codigo de erro 2 - Syntax Error)
 if [ "$PARM1" != "pah" ]; then
@@ -123,7 +123,7 @@ SDIRETO=$(clSDIRETORIO $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que a rotina certa para a FI
 
-[ "$IDFI" != "pah" ] && echo "[pcpah]  1.02      - Com esta chamada so se processa $SIGLA, verifique!" && exit 2
+[ "$IDFI" != "pah" ] && echo '[pcpah]  1.02      - Syntax error:- Only the PAHO I.S. can be treated by this program. $SIGLA cannot!' && exit 2
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
@@ -214,7 +214,7 @@ exit 0
 
 
 cat > /dev/null <<COMMENT
-.    Entrada : PARM1 com o identificador da BBO
+.    Entrada : PARM1 com o identificador da PAHO
 .      Saida : M/F pah_LILACS gerado no diretorio pah.lil
 .   Corrente : nao determinado, desde que compensado na chamada
 .    Chamada : /bases/lilG4/shs.lil/pos_coleta_pah.sh pah

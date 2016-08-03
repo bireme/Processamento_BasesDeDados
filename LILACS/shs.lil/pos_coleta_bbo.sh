@@ -125,7 +125,7 @@ SDIRETO=$(clSDIRETORIO $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que a rotina certa para a FI
 
-[ "$IDFI" != "bbo" ] && echo "[pcbbo]  1.02      - Com esta chamada so se processa $SIGLA, verifique!" && exit 2
+[ "$IDFI" != "bbo" ] && echo '[pcbbo]  1.02      - Syntax error:- Only the BBO I.S. can be treated by this program. $SIGLA cannot!' && exit 2
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais

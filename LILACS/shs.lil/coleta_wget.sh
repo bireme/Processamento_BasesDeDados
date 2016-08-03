@@ -20,6 +20,8 @@ vrs:  0.00 20160524, FJLopes
 	- Edicao original
 vrs:  0.01 20160610, FJLopes
 	- Limpeza de codigo e comentarios
+vrs:  0.02 20160728, FJLopes
+	- Aprimoramento para coleta multipla
 HISTORICO
 
 # ========================================================================== #
@@ -139,7 +141,7 @@ SDIRETO=$(clSDIRETORIO $IDFI)
  PASSCL=$(clPASSWD     $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que a rotina certa para o tipo de coleta da FI
-[ "$TIPOC" != "wget" ] && echo "[c_wgt]  1.02      - Configuration mismatch:- Only the wget method is supported by this program!" && exit 4
+[ "$TIPOC" != "wget" ] && echo '[c_wgt]  1.02      - Configuration mismatch:- Only the wget method is supported by this program!' && exit 4
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
@@ -198,16 +200,21 @@ cd $DIRETO
 # Efetua a tomada dos dados
 echo "[c_wgt]  2         - Efetiva a transferencia de dados"
 
-ARQUIVO=$(basename $(clSSERVER $IDFI))
-[ -f $ARQUIVO ] && rm -f $ARQUIVO
-wget -o traz${ARQUIVO}.out "$SSERVER"
-RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
-chkError $RSP "ERROR: wget $SSERVER"
+for i in $(seq 0 $MAXFILE)
+do
+	ARQUIVO=$(basename $(clSSERVER $IDFI))
+	ARQUIVO=${FILES[$i]}
+	[ -f $ARQUIVO ] && rm -f $ARQUIVO
+#	wget -o traz${ARQUIVO}.out "$SSERVER"
+	wget -o traz${ARQUIVO}.out "$SSERVER$ARQUIVO"
+	RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
+	chkError $RSP "ERROR: wget $SSERVER"
 
-# Fixa permissoes do arquivo recebido
-echo "[c_wgt]  2.01      - Fixando permissoes do arquivo recebido"
-chmod ug=rw ${FILES[0]}
-chmod  o=r  ${FILES[0]}
+	# Fixa permissoes do arquivo recebido
+	echo "[c_wgt]  2.01      - Fixando permissoes do arquivo recebido"
+	chmod ug=rw ${FILES[$i]}
+	chmod  o=r  ${FILES[$i]}
+done
 
 echo "[c_wgt]  3         - Finda execucao da coleta"
 [ -d "logs" ] || mkdir -p logs
@@ -300,5 +307,6 @@ cat > /dev/null <<SPICEDHAM
 CHANGELOG
 20160524 Edição original
 20160610 Enxugamento de codigo e comentarios
+20160728 Aprimoramentos na coleta permitindo coleta multiplos arquivos
 SPICEDHAM
 

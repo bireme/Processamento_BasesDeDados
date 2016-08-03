@@ -84,7 +84,7 @@ done
 
 # ========================================================================== #
 #     1234567890123456789012345
-echo "[pccid]  1         - Inicia processamento de pos coleta de BBO"
+echo "[pccid]  1         - Inicia processamento de pos coleta de CidSaude"
 # -------------------------------------------------------------------------- #
 # Garante que a o parametro 1 seja informado (sai com codigo de erro 2 - Syntax Error)
 if [ "$PARM1" != "cid" ]; then
@@ -123,7 +123,7 @@ SDIRETO=$(clSDIRETORIO $IDFI)
 # -------------------------------------------------------------------------- #
 # Garante que a rotina certa para a FI
 
-[ "$IDFI" != "cid" ] && echo "[pccid]  1.02      - Com esta chamada so se processa $SIGLA, verifique!" && exit 2
+[ "$IDFI" != "cid" ] && echo '[pccid]  1.02      - Syntax error:- Only the CidSaude I.S. can be treated by this program. $SIGLA cannot!' && exit 2
 
 # -------------------------------------------------------------------------- #
 # Ajusta lista de arquivos conforme regras gerais
@@ -192,7 +192,7 @@ dos2unix -f ${FILES[0]}
 echo "[pccid]  2.02      - Cria M/F para o restante do processamento"
 mx iso=${FILES[0]} create=${IDFI}_LILACS -all now
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
-chkError $RSP "ERROR: [pccid] Convertendo ISO-2709 em M/F de PAHO"
+chkError $RSP "ERROR: [pccid] Convertendo ISO-2709 em M/F de CidSaude"
 
 echo "[pccid]  3         - Finaliza execucao de $TREXE"
 
@@ -206,7 +206,7 @@ exit 0
 
 
 cat > /dev/null <<COMMENT
-.    Entrada : PARM1 com o identificador da BBO
+.    Entrada : PARM1 com o identificador da CidSaude
 .      Saida : M/F cid_LILACS gerado no diretorio cid.lil
 .   Corrente : nao determinado, desde que compensado na chamada
 .    Chamada : /bases/lilG4/shs.lil/pos_coleta_cid.sh cid
