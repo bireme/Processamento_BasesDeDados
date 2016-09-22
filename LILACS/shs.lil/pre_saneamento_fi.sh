@@ -16,9 +16,13 @@
 #       - Descricao
 cat > /dev/null <<HISTORICO
 vrs:  0.00 20160610, FJLopes
-	- Edicao original
+.	- Edicao original
 vrs:  0.01 20160614, FJLopes
-	- Adicao de tratamento de URL em pre_sano1.in
+.	- Adicao de tratamento de URL em pre_sano1.in
+vrs:  0.02 20160830, FJLopes
+.	- Adicao de tratamento para ocorrencias repetidas de v8 em pre_sano1.in
+vrs:  0.03 20160919, FJLopes
+.	- Inclusao do tratamento de distancia de data de publicacao
 HISTORICO
 
 # ========================================================================== #
@@ -186,70 +190,114 @@ echo "[ps_fi]  2.01      - Normaliza denominacao do M/F de entrada"
 [ -f "${IDFI}_LILACS.mst" ] || mv LILACS.mst ${IDFI}_LILACS.mst
 [ -f "${IDFI}_LILACS.xrf" ] || mv LILACS.xrf ${IDFI}_LILACS.xrf
 
-echo "[ps_fi]  2.02      - Normaliza campos de descritores, URL internet e limpa campos de temas (etapa 1/4)"
+echo "[ps_fi]  2.02      - Normaliza campos de descritores, URL internet e limpa campos de temas (etapa 1/5)"
 
 if [ ! -s "../tabs/norm_v8.prc" ]; then
-	echo " 'd8'"                                          >  ../tabs/norm_v8.prc
-	echo " if v8>'' then"                                 >> ../tabs/norm_v8.prc
-	echo "   'a8'"                                      >> ../tabs/norm_v8.prc
-	echo "   if p(v8^u) then |Internet^i|v8^u else v8 fi" >> ../tabs/norm_v8.prc
-	echo "   if p(v8^q) then |^q|v8^q fi"                 >> ../tabs/norm_v8.prc
-	echo "   if p(v8^y) then |^y|v8^y fi"                 >> ../tabs/norm_v8.prc
-	echo "   ''"                                        >> ../tabs/norm_v8.prc
-	echo " fi"                                            >> ../tabs/norm_v8.prc
+	echo " 'd8'"                                              >  ../tabs/norm_v8.prc
+	echo "("                                                  >> ../tabs/norm_v8.prc
+	echo "  if v8>'' then"                                    >> ../tabs/norm_v8.prc
+	echo "    'a8'"                                         >> ../tabs/norm_v8.prc
+	echo "    if p(v8^u) then 'Internet^i',v8^u else v8 fi"   >> ../tabs/norm_v8.prc
+	echo "    if v8^i>'' then |^l|v8^i fi"                    >> ../tabs/norm_v8.prc
+	echo "    if v8^q>'' then |^q|v8^q fi"                    >> ../tabs/norm_v8.prc
+	echo "    if v8^x>'' then |^x|v8^x fi"                    >> ../tabs/norm_v8.prc
+	echo "    if v8^y>'' then |^y|v8^y fi"                    >> ../tabs/norm_v8.prc
+	echo "    if v8^z>'' then |^z|v8^z fi"                    >> ../tabs/norm_v8.prc
+	echo "    ''"                                           >> ../tabs/norm_v8.prc
+	echo "  fi"                                               >> ../tabs/norm_v8.prc
+	echo " )"                                                 >> ../tabs/norm_v8.prc
 fi
 
-echo "gizmo=../tabs/g87,87,88"    >  pre_sano1.in;	# normaliza campos descr para sub-d e sub-s como devido
-echo "gizmo=../tabs/gV8homolog,8" >> pre_sano1.in;	# Retira .homologo do URL para texto completo
-echo "proc='d870d880'"            >> pre_sano1.in;	# Libera campo para temas
-echo "proc=@../tabs/norm_v8.prc"  >> pre_sano1.in;	# Normaliza v8 para padrao de endereco de Internet
-echo "proc='s'"                   >> pre_sano1.in;	# Ordena campos do registro
-echo "now"                        >> pre_sano1.in
-echo "-all"                       >> pre_sano1.in
-echo "tell=50000"                 >> pre_sano1.in
+if [ ! -s "../tabs/repv8.prc" ]; then
+	echo " proc('d888d889')"                                  >  ../tabs/repv8.prc
+	echo " ("                                                 >> ../tabs/repv8.prc
+	echo "   if v888[1]:s(v8||) then ,"                     >> ../tabs/repv8.prc
+	echo "   else"                                            >> ../tabs/repv8.prc
+	echo "     proc('d888a888|'v888[1],v8'|','a889|'v8'|')" >> ../tabs/repv8.prc
+	echo "   fi"                                              >> ../tabs/repv8.prc
+	echo " )"                                                 >> ../tabs/repv8.prc
+	echo " proc('d888')"                                      >> ../tabs/repv8.prc
+	echo " proc('d8d889',|a8|v889||)"                      >> ../tabs/repv8.prc
+fi
+
+echo "gizmo=../tabs/g87,87,88"       >  pre_sano1.in;	# normaliza campos descr para sub-d e sub-s como devido
+echo "gizmo=../tabs/gV8homolog,8"    >> pre_sano1.in;	# Retira .homologo do URL para texto completo
+echo "proc='d870d880'"               >> pre_sano1.in;	# Libera campo para temas
+echo "proc=@../tabs/repv8.prc"       >> pre_sano1.in;	# Elimina ocorrencias repetidas de v8
+echo "proc=@../tabs/norm_v8.prc"     >> pre_sano1.in;	# Normaliza v8 para padrao de endereco de Internet
+echo "proc='s'"                      >> pre_sano1.in;	# Ordena campos do registro
+echo "now"                           >> pre_sano1.in
+echo "-all"                          >> pre_sano1.in
+echo "tell=50000"                    >> pre_sano1.in
 
 mx ${IDFI}_LILACS in=pre_sano1.in create=tmp_trash
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 mv tmp_trash.mst ${IDFI}.mst
 mv tmp_trash.xrf ${IDFI}.xrf
-chkError $RSP "ERROR: [ps_fi] Etapa 1 de 4"
+chkError $RSP "ERROR: [ps_fi] Etapa 1 de 5"
 
 # Nao sera executado, so faz numero ate ser liberado para execucao
-echo "[ps_fi]  2.03      - Aplica gizmos em descritores e reversao de metodologia (etapa 2/4)"
+echo "[ps_fi]  2.03      - Aplica gizmos em descritores e reversao de metodologia (etapa 2/5)"
 
-echo "gizmo=../tabs/g87,87,88"      >  pre_sano2.in;	# normaliza campos descr para sub-d e sub-s como devido
-echo "proc=@../tabs/lilnew2old.prc" >> pre_sano2.in;	# Coloca a base em conformidade com a antiga metodologia LILACS
-echo "proc='d235'"                  >> pre_sano2.in;	# Promove limpeza de campos
-echo "-all"                         >> pre_sano2.in
-echo "now"                          >> pre_sano2.in
-echo "tell=50000"                   >> pre_sano2.in
+echo "gizmo=../tabs/g87,87,88"       >  pre_sano2.in;	# normaliza campos descr para sub-d e sub-s como devido
+echo "proc=@../tabs/lilnew2old.prc"  >> pre_sano2.in;	# Coloca a base em conformidade com a antiga metodologia LILACS
+echo "proc='d235'"                   >> pre_sano2.in;	# Promove limpeza de campos
+echo "-all"                          >> pre_sano2.in
+echo "now"                           >> pre_sano2.in
+echo "tell=50000"                    >> pre_sano2.in
+
 cat > /dev/null <<COMMENT
 mx ${IDFI} in=pre_sano2.in create=tmp_trash
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 mv tmp_trash.mst ${IDFI}.mst
 mv tmp_trash.xrf ${IDFI}.xrf
-chkError $RSP "ERROR: [ps_fi] Etapa 2 de 4"
+chkError $RSP "ERROR: [ps_fi] Etapa 2 de 5"
 COMMENT
 
-echo "[ps_fi]  2.04      - Aplica gizmos de pontuacao tipografica (etapa 3/4)"
+echo "[ps_fi]  2.04      - Aplica gizmos de pontuacao tipografica (etapa 3/5)"
 mx ${IDFI} gizmo=../tabs/gansent_hom -all now create=tmp_trash tell=50000
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 mv tmp_trash.mst ${IDFI}.mst
 mv tmp_trash.xrf ${IDFI}.xrf
-chkError $RSP "ERROR: [ps_fi] Etapa 3 de 4"
+chkError $RSP "ERROR: [ps_fi] Etapa 3 de 5"
+
+echo "[ps_fi]  2.05      - Cria campos de ano e mes de publicacao (854) e meses passados desde a publicacao (855), antes de processar para iAH (etapa 4/5)"
+
+echo "proc=if size(v65)=4 and nocc(v65)=1 then 'a65~'v65'00~' fi"        >  pre_sano3.in
+echo "proc=@pre_sano4.in"                                                >> pre_sano3.in
+echo "-all"                                                              >> pre_sano3.in
+echo "now"                                                               >> pre_sano3.in
+echo "tell=100000"                                                       >> pre_sano3.in
+
+echo " if p(v65) and nocc(v65)=1 then"                                   >  pre_sano4.in
+echo "   '<854>'v65.6'</854>' /* Ano e Mes na forma YYYYMM */"           >> pre_sano4.in
+echo "   '<855>'              /* Distancia entre hoje e v65 em meses */" >> pre_sano4.in
+echo "     e1:=(val(s(date).4)-1900)*12+val(s(date)*4.2)"                >> pre_sano4.in
+echo "     e2:=(val(v65.4)-1900)*12+val(v65*4.2)"                        >> pre_sano4.in
+echo "     replace(f(e1-e2,4,0),' ','0')"                                >> pre_sano4.in
+echo "   '</855>'"                                                       >> pre_sano4.in
+echo " fi"                                                               >> pre_sano4.in
+
+mx ${IDFI} in=pre_sano3.in  create=tmp_trash
+RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
+mv tmp_trash.mst ${IDFI}.mst
+mv tmp_trash.xrf ${IDFI}.xrf
+chkError $RSP "ERROR: [ps_fi] Etapa 4 de 5"
 
 # Eh desejavel que esta seja a ultima etapa do pre saneamento das bases de dados CDS/ISIS
-echo "[ps_fi]  2.05      - Efetua uma copia limpa da base com MXCP (etapa 4/4)"
+echo "[ps_fi]  2.06      - Efetua uma copia limpa da base com MXCP (etapa 5/5)"
 mxcp ${IDFI} create=tmp_trash clean period=. log=${IDFI}.mxcp.log tell=50000
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 mv tmp_trash.mst ${IDFI}_pre_saneamento.mst
 mv tmp_trash.xrf ${IDFI}_pre_saneamento.xrf
-chkError $RSP "ERROR: [ps_fi] Etapa 4 de 4"
+chkError $RSP "ERROR: [ps_fi] Etapa 5 de 5"
 
 # -------------------------------------------------------------------------- #
 echo "[ps_fi]  3         - M/F pre-saneado, limpa a area de trabalho"
 [ -f "pre_sano1.in" ] && rm -f pre_sano1.in
 [ -f "pre_sano2.in" ] && rm -f pre_sano2.in
+[ -f "pre_sano3.in" ] && rm -f pre_sano3.in
+[ -f "pre_sano4.in" ] && rm -f pre_sano4.in
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -321,5 +369,6 @@ cat >/dev/null <<SPICEDHAM
 CHANGELOG
 20160610 Edicao original
 20160614 Adicao de tratamento mais detalhado da normalizacao de endereco de Internet em pre_sano1.in
+20160830 Adicao de tratamento para eliminacao de ocorrencias duplicadas em v8 antes de normalliza-lo
 SPICEDHAM
 

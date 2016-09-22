@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # -------------------------------------------------------------------------- #
-# iah_fi.sh - Processamento basico de FI para iAH                            #
+# iah_like_lilacs_fi.sh - Processamento basico de FI para iAH                #
 # -------------------------------------------------------------------------- #
-# Chamada : iah_fi.sh [-V] <ID_FI>
-# Exemplo : nohup ../shs.lil/iah_fi.sh bde &> logs/$(date '+%Y%m%d').IAH.txt &
+# Chamada : iah_like_lilacs_fi.sh [-V] <ID_FI>
+# Exemplo : nohup ../shs.lil/iah_like_lilacs_fi.sh bde &> logs/$(date '+%Y%m%d').IAH.txt &
 # ATENCAO : Aceita entrada nas mascaras: ???_pre_saneamento
 #                                        ???_lil_saneada
 #                                        ???_lil_pos_saneada
@@ -22,6 +22,8 @@ vrs:  0.00 20160610, FJLopes
 	- Edicao original
 vrs:  0.01 20160615, FJLopes
 	- Aceita multiplos nomes de entrada
+vrs:  0.02 20160919, FJLopes / MBottura
+	- Processa nmail especifica para REPIDISCA
 HISTORICO
 
 # ========================================================================== #
@@ -32,6 +34,13 @@ source  $MISC/infra/infoini.inc
 
 # Incorpora biblioteca de processos de coleta
 source ../shs.lil/inc/coletas.inc
+
+# ========================================================================== #
+#                                  FUNCOES                                   #
+# ========================================================================== #
+function apaga {
+        [ $(ls $1 2> /dev/null | wc -l) -gt 0 ] && rm -f $1
+}
 
 # Assume valores DEFAULT
 NOERRO=0;	# Controla o modo "Ignore Erros"
@@ -145,7 +154,11 @@ echo "[iahfi]  2         - Normaliza denominacao da M/F de entrada"
 
 echo "[iahfi]  2.01      - Geracao de mail para ${IDFI}"
 MSG="Erro na geracao do mail"
+if [ "$IDFI" = "rep" ]; then
+ ../shs.lil/genrepmail.sh $TABS/redir.iso
+else
  ../tpl.lil/genlilmail.sh lil ../tpl.mail/nmail mail
+fi
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -154,7 +167,7 @@ chkError $RSP "$MSG"
 
 echo "[iahfi]  2.01      - Faselilmh - Geracao de invertidos de MH para ${IDFI}"
 MSG="Erro na Faselilmh"
- ../tpl.lil/faselilmh.sh lil 50000
+ ../shs.lil/faselilmh.sh lil 50000
 RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 chkError $RSP "$MSG"
 
@@ -195,10 +208,39 @@ echo "[iahfi]  3.02      - Retira M/F de entrada intermediaria daqui"
 [ -f ${IDFI}.xrf ]                && mv ${IDFI}.{mst,xrf} input
 
 echo "[iahfi]  3.03      - Limpeza do diretorio"
-MSG="Erro: LIMPALIL.SH "
- ../tpl.lil/limpalil.sh lil
-RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
-chkError $RSP "$MSG"
+apaga '*.tag'
+apaga '*.par'
+apaga '*.srt'
+apaga '*.log'
+apaga '*fst'
+apaga '*lk?'
+apaga '*ln?'
+apaga '*lst'
+apaga '*sta'
+apaga '$1er.*'
+apaga '$1pd.*'
+apaga '$1x.*'
+apaga '$1deat.*'
+apaga '$1dect.*'
+apaga '$1de.*'
+apaga 'gizct.*'
+apaga '$1"67".*'
+apaga 'decspar'
+apaga 'decsctpar'
+apaga '$1ctc*'
+apaga 'actmail.*'
+apaga '*comp*'
+apaga 'lser*'
+apaga 'autor*'
+apaga 'ntitle.*'
+apaga 'gisolil.*'
+apaga 'lil89.*'
+apaga '$1_asc850.*'
+apaga '$1_xml.xml'
+apaga 'decs.iyp'
+apaga 'decs.cnt'
+apaga 'decs.n0?'
+apaga 'decs.ly?'
 # -------------------------------------------------------------------------- #
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -267,5 +309,7 @@ CHANGELOG
 20160610 Edicao original do processamento fatorado de LILACS para iAH
 20160615 Julga qual base usar entre pre_saneamento, lil_saneada, e pos_saneada, preferindo pos sobre lil sobre pre
 20160719 Movimenta residous de entrada para diretorio especifico (input)
+20160919 Criada a decisao de processar nmail com genlilmail ou genrepmail qdo for repidisca
+         Incluida internamente a limpeza de subprodutos do processamento (e nao mais em shell externo)
 SPICEDHAM
 

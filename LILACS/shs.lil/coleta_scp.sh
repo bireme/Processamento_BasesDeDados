@@ -22,6 +22,8 @@ vrs:  0.01 20160610, FJLopes
 	- Limpa no codigo deixando so o essencial
 vrs:  0.02 20160623, FJLopes
 	- Admite este servidor como o fonte de dados
+vrs:  0.03 20160816, FJLopes
+	- Otimiza ajuste de permissoes de arquivos recebidos
 HISTORICO
 
 # ========================================================================== #
@@ -255,7 +257,7 @@ echo "[c_scp]  2.01      - Copia arquivos"
 
 for i in $(seq 0 $MAXFILE)
 do
-	echo "[c_scp]  2.01.01.$i -  Copiando ${FILES[$i]} de $SIGLA para $PWD"
+	echo "[c_scp]  2.01.$i.01 -  Copiando ${FILES[$i]} de $SIGLA para $PWD"
 	egrep 'LILACS' >/dev/null <<<${FILES[$i]}
 	RSP=$?
 	if [ $RSP -eq 0 ]; then
@@ -265,10 +267,11 @@ do
 	fi
 	RSP=$?; [ "$NOERRO" = "1" ] && RSP=0
 	chkError $RSP "Copiando ${FILES[$i]} de $SIGLA"
-done
 
-echo "[c_scp]  2.01.02    - Fixando permissoes dos arquivos recebidos"
-find . -type f -iname "*.[mxi][sr][tof]" | xargs chmod 664
+	echo "[c_scp]  2.01.$i.02 -  Prepara o ajuste de permissoes de cada arquivo ao recebe-lo"
+	echo -e "echo \"[c_scp]  2.01.$i.03 -  Ajustando permissoes de ${FILES[$i]}\"\nchmod 664 ${FILES[$i]/{mst,xrf\}/mst ${FILES[$i]/{mst,xrf\}/xrf}}" > temp.sh
+	bash ./temp.sh; [ -s temp.sh ] && rm -f temp.sh
+done
 
 # Incorpora biblioteca de controle basico de processamento
 source  $MISC/infra/infofim.inc
@@ -294,7 +297,10 @@ cat > /dev/null <<COMMENT
 .    Chamada :  coleta_scp.sh [-V] <ID_FI>
 .    Exemplo :  nohup ../shs.lil/coleta_scp.sh -d 2 ibc &> logs/YYYYMMDD.coleta.txt &
 .Objetivo(s) :  1- Obter novos dados da Fonte de Informacao na origem
-.Comentarios :  
+.Comentarios :  No URL http://aurelio.net/shell/canivete/ item 4 Expansao de variaveis
+.		  ha dicas importantes de manipulacao de variaveis on the fly
+.		No URL https://www.vivaolinux.com.br/artigo/Trabalhar-com-array-no-Bash?pagina=1
+.		  ha explicacoes sobre o uso de array em shell-bash
 .Observacoes :  DEBUG eh uma variavel mapeada por bit conforme
 .                       _BIT0_  Aguarda tecla <ENTER> (suportada por rdBreak)
 .                       _BIT1_  Nivel de depuracao (em conjunto com bit2)
@@ -388,5 +394,6 @@ CHANGELOG
 20160513 Edição original
 20160610 Enxugamento de codigo, mais comentarios diferenciados para fins de documentacao
 20160623 Permite que o servidor hospedeiro seja fonte de dados para coleta
+20160816 Altera o ajuste de pemissoes, limitando a cada arquivo recebido
 SPICEDHAM
 
